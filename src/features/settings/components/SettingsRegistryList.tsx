@@ -46,6 +46,8 @@ const toScope = (scope?: RegisteredSetting["scope"]): string => {
 
 const columnHelper = createColumnHelper<RegisteredSetting>();
 
+// Table render callbacks run as untracked Solid component setup, so translated
+// text must live in JSX bindings to keep reacting to language changes.
 export function SettingsRegistryList(
   props: SettingsRegistryListProps,
 ): JSX.Element {
@@ -64,8 +66,11 @@ export function SettingsRegistryList(
     // biome-ignore lint/suspicious/noExplicitAny: TanStack Table's second generic varies per column.
     const cols: ColumnDef<RegisteredSetting, any>[] = [
       columnHelper.accessor("id", {
-        header: () =>
-          t("settings.registry.columns.key", { defaultValue: "Key" }),
+        header: () => (
+          <span>
+            {t("settings.registry.columns.key", { defaultValue: "Key" })}
+          </span>
+        ),
         meta: { className: monospace },
         cell: ({ getValue }) => {
           const id = getValue();
@@ -83,13 +88,16 @@ export function SettingsRegistryList(
       cols.push(
         columnHelper.accessor("labelKey", {
           id: "currentLang",
-          header: () => localeLabel[currentLocale()],
+          header: () => <span>{localeLabel[currentLocale()]}</span>,
           meta: { className: mutedCell },
-          cell: ({ row }) =>
-            t(row.original.labelKey, {
-              lng: currentLocale(),
-              defaultValue: row.original.labelKey,
-            }),
+          cell: ({ row }) => (
+            <span>
+              {t(row.original.labelKey, {
+                lng: currentLocale(),
+                defaultValue: row.original.labelKey,
+              })}
+            </span>
+          ),
         }),
       );
     }
@@ -97,23 +105,32 @@ export function SettingsRegistryList(
     cols.push(
       columnHelper.accessor("labelKey", {
         id: "en",
-        header: () =>
-          t("settings.registry.columns.en", {
-            defaultValue: "English",
-          }),
+        header: () => (
+          <span>
+            {t("settings.registry.columns.en", {
+              defaultValue: "English",
+            })}
+          </span>
+        ),
         meta: { className: mutedCell },
-        cell: ({ row }) =>
-          t(row.original.labelKey, {
-            lng: "en",
-            defaultValue: row.original.labelKey,
-          }),
+        cell: ({ row }) => (
+          <span>
+            {t(row.original.labelKey, {
+              lng: "en",
+              defaultValue: row.original.labelKey,
+            })}
+          </span>
+        ),
       }),
       columnHelper.display({
         id: "scope",
-        header: () =>
-          t("settings.registry.columns.scope", {
-            defaultValue: "Scope",
-          }),
+        header: () => (
+          <span>
+            {t("settings.registry.columns.scope", {
+              defaultValue: "Scope",
+            })}
+          </span>
+        ),
         size: 100,
         meta: {},
         cell: ({ row }) => (
