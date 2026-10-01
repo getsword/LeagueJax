@@ -19,6 +19,7 @@ use tracing_subscriber::{EnvFilter, Registry};
 
 use crate::commands::auto_accept::*;
 use crate::commands::claim_tool::*;
+use crate::commands::counter_overlay::*;
 use crate::commands::game_reference::*;
 use crate::commands::history::*;
 use crate::commands::lcu::*;
@@ -26,6 +27,7 @@ use crate::commands::map::*;
 use crate::commands::mcp::*;
 use crate::commands::mini_window::*;
 use crate::commands::ongoing_game::*;
+use crate::commands::opgg::*;
 use crate::commands::platform::*;
 use crate::commands::replay::*;
 use crate::commands::settings::*;
@@ -297,6 +299,9 @@ pub fn run() {
             lcu_get_pickable_champion_ids,
             lcu_dodge_champ_select,
             lcu_kill_and_restart_ux,
+            opgg_list_champions,
+            opgg_get_champion_detail,
+            counter_overlay_dismiss,
             ongoing_game_get_snapshot,
             ongoing_game_refresh,
             ongoing_game_refresh_match_histories,
@@ -368,6 +373,7 @@ pub fn run() {
                 .register(Arc::new(shards::claim_tool::ClaimToolShard::new()))
                 .register(Arc::new(shards::auto_reply::AutoReplyShard::new()))
                 .register(Arc::new(shards::ongoing_game::OngoingGameShard::new()))
+                .register(Arc::new(shards::counter_overlay::CounterOverlayShard::new()))
                 .register(Arc::new(shards::saved_player::SavedPlayerShard::new()))
                 .register(Arc::new(shards::statistics::StatisticsShard::new()))
                 .register(Arc::new(shards::keyboard::KeyboardShard::new()))

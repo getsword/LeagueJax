@@ -104,4 +104,11 @@ export type OngoingGameUpdated = {
   ready_check: MatchmakingReadyCheckData | null;
   champ_select_session: ChampSelectSessionData | null;
   team_members: Array<OngoingGameTeamMember>;
+  enemy_champion_picks: Array<EnemyChampionPick>;
+};
+
+export type EnemyChampionPick = {
+  cellId: number;
+  championId: number;
+  position: string;
 };

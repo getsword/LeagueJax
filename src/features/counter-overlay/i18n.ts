@@ -1,0 +1,73 @@
+import type { LocaleResource } from "@/i18n/types";
+
+export const counterOverlayI18n: LocaleResource = {
+  en: {
+    counterOverlay: {
+      title: "Counters",
+      source: "OP.GG global ranked",
+      dismiss: "Close",
+      collapse: "Collapse",
+      expand: "Expand",
+      waiting: "Waiting for an enemy lock",
+      loading: "Loading OP.GG",
+      loadFailed: "Could not load counter data",
+      insufficient: "Not enough games for this matchup",
+      unknownPosition: "Unknown lane",
+      winRate: "Win rate {{rate}}",
+      games: "{{count}} games",
+      positions: {
+        TOP: "Top",
+        JUNGLE: "Jungle",
+        MID: "Mid",
+        ADC: "Bot",
+        SUPPORT: "Support",
+      },
+    },
+  },
+  "zh-CN": {
+    counterOverlay: {
+      title: "克制",
+      source: "OP.GG 全球排位",
+      dismiss: "关闭",
+      collapse: "收起",
+      expand: "展开",
+      waiting: "等待对方锁定英雄",
+      loading: "正在读取 OP.GG",
+      loadFailed: "克制数据没能读出来",
+      insufficient: "这场对位的样本不够",
+      unknownPosition: "分路未知",
+      winRate: "胜率 {{rate}}",
+      games: "{{count}} 场",
+      positions: {
+        TOP: "上单",
+        JUNGLE: "打野",
+        MID: "中单",
+        ADC: "下路",
+        SUPPORT: "辅助",
+      },
+    },
+  },
+  "ja-JP": {
+    counterOverlay: {
+      title: "カウンター",
+      source: "OP.GG グローバルランク",
+      dismiss: "閉じる",
+      collapse: "折りたたむ",
+      expand: "展開",
+      waiting: "相手のロックを待っています",
+      loading: "OP.GG を読み込み中",
+      loadFailed: "カウンターデータを読み込めませんでした",
+      insufficient: "この対面のサンプルが足りません",
+      unknownPosition: "レーン不明",
+      winRate: "勝率 {{rate}}",
+      games: "{{count}} 試合",
+      positions: {
+        TOP: "トップ",
+        JUNGLE: "ジャングル",
+        MID: "ミッド",
+        ADC: "ボット",
+        SUPPORT: "サポート",
+      },
+    },
+  },
+};

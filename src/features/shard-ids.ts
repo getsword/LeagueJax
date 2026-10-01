@@ -18,6 +18,7 @@ export const SHARD_IDS = {
   NOTIFICATIONS: shardId("00000000-0000-4000-8000-100000000009"),
   DEBUG_COMMANDS: shardId("00000000-0000-4000-8000-100000000010"),
   REPLAY: shardId("4b7a2a92-951e-4ca6-b5f5-df6c7cbb4f02"),
+  CHAMPIONS: shardId("7c1e9a44-5b20-4f1a-9c33-8e6d2a1b0c47"),
 
   // Dual-side (use backend UUIDs)
   SETTINGS: shardId("b59f17b0-24ef-4ce1-a106-f430ec20457e"),

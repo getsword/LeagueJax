@@ -160,6 +160,55 @@ pub struct OngoingGameUpdated {
     pub ready_check: Option<MatchmakingReadyCheckData>,
     pub champ_select_session: Option<ChampSelectSessionData>,
     pub team_members: Vec<OngoingGameTeamMember>,
+    pub enemy_champion_picks: Vec<EnemyChampionPick>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS, PartialEq, Eq)]
+#[ts(export, export_to = "ongoing_game.ts")]
+#[serde(rename_all = "camelCase")]
+pub struct EnemyChampionPick {
+    pub cell_id: u64,
+    pub champion_id: u32,
+    pub position: String,
+}
+
+pub fn enemy_champion_picks(
+    phase: OngoingGamePhase,
+    session: Option<&ChampSelectSessionData>,
+) -> Vec<EnemyChampionPick> {
+    if phase != OngoingGamePhase::ChampSelect {
+        return Vec::new();
+    }
+    let Some(session) = session else {
+        return Vec::new();
+    };
+
+    session
+        .their_team
+        .iter()
+        .filter_map(|member| {
+            let champion_id = u32::try_from(member.champion_id).ok()?;
+            if champion_id == 0 {
+                return None;
+            }
+            Some(EnemyChampionPick {
+                cell_id: member.cell_id,
+                champion_id,
+                position: opgg_position(member.assigned_position).to_string(),
+            })
+        })
+        .collect()
+}
+
+fn opgg_position(position: LanePosition) -> &'static str {
+    match position {
+        LanePosition::Top => "TOP",
+        LanePosition::Jungle => "JUNGLE",
+        LanePosition::Middle => "MID",
+        LanePosition::Bottom => "ADC",
+        LanePosition::Utility => "SUPPORT",
+        LanePosition::None | LanePosition::Fill | LanePosition::AFK => "",
+    }
 }
 
 #[derive(Debug, Clone, Serialize, TS)]
@@ -233,4 +282,33 @@ pub enum OngoingGameInput {
         games: Option<Vec<RawMatchSummaryGame>>,
         game_id: Option<u64>,
     },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn enemy_picks_keep_locked_champions_only() {
+        let mut locked = TeamMember::default();
+        locked.cell_id = 4;
+        locked.champion_id = 86;
+        locked.assigned_position = LanePosition::Top;
+        let mut hovering = TeamMember::default();
+        hovering.cell_id = 5;
+        hovering.champion_pick_intent = 122;
+        let mut session = ChampSelectSessionData::default();
+        session.their_team = vec![hovering, locked];
+
+        let picks = enemy_champion_picks(OngoingGamePhase::ChampSelect, Some(&session));
+        assert_eq!(
+            picks,
+            vec![EnemyChampionPick {
+                cell_id: 4,
+                champion_id: 86,
+                position: "TOP".to_string(),
+            }]
+        );
+        assert!(enemy_champion_picks(OngoingGamePhase::InGame, Some(&session)).is_empty());
+    }
 }

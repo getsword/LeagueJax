@@ -1,5 +1,6 @@
 import type { SolidWebShard } from "@/runtime/solid-web-contract";
 import { SolidAutomationShard } from "./automation/manifest";
+import { SolidChampionsShard } from "./champions/manifest";
 import { SolidHistoryShard } from "./history/manifest";
 import { I18nRuntimeShard } from "./i18n/runtime-shard";
 import { SolidMcpFeature } from "./mcp/manifest";
@@ -29,6 +30,7 @@ export function createSolidMainWebShards(): SolidWebShard[] {
     new SolidTrayShard(),
     new SolidMiniShard(),
     new SolidHistoryShard(),
+    new SolidChampionsShard(),
     new SolidReplayShard(),
     new SolidOngoingGameShard(),
     new SolidAutomationShard(),

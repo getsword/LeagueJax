@@ -754,6 +754,16 @@ impl Shard for MiniWindowShard {
     }
 }
 
+pub(crate) fn league_client_rect(pid: u32) -> Option<(i32, i32, i32, i32)> {
+    let rect = native_window::visible_rect_for_pid(pid)?;
+    Some((
+        rect.origin.x,
+        rect.origin.y,
+        rect.size.width,
+        rect.size.height,
+    ))
+}
+
 #[cfg(target_os = "windows")]
 mod native_window {
     use super::{DockLayout, Insets, PxPoint, PxRect, PxSize};

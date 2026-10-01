@@ -22,7 +22,7 @@ use crate::shards::sgp::LcuSessionSgpExt;
 use super::context::OngoingGameCtx;
 use super::tree::{phase_of, ONGOING_TREE};
 use super::types::{
-    OngoingGameEvent, OngoingGameInput, OngoingGameMatchHistoriesUpdated,
+    enemy_champion_picks, OngoingGameEvent, OngoingGameInput, OngoingGameMatchHistoriesUpdated,
     OngoingGameMatchHistoryState, OngoingGamePhase, OngoingGamePlayerLoadStatus,
     OngoingGameSlotKind, OngoingGameSummonerState, OngoingGameSummonersUpdated,
     OngoingGameTeamMember, OngoingGameUpdated,
@@ -207,6 +207,7 @@ fn broadcast_updated(envo: &Envo, phase: OngoingGamePhase) {
         ready_check: effective_ready_check_clone(envo),
         champ_select_session,
         team_members: ctx.team_members.iter().map(ongoing_team_member).collect(),
+        enemy_champion_picks: enemy_champion_picks(phase, ctx.champ_select_session.as_ref()),
     };
     let channels = ctx.channels.clone();
     drop(ctx);

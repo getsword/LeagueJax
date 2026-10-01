@@ -1,5 +1,6 @@
 pub mod auto_accept;
 pub mod claim_tool;
+pub mod counter_overlay;
 pub mod game_reference;
 pub mod history;
 pub mod lcu;
@@ -7,6 +8,7 @@ pub mod map;
 pub mod mcp;
 pub mod mini_window;
 pub mod ongoing_game;
+pub mod opgg;
 pub mod platform;
 pub mod replay;
 pub mod settings;
