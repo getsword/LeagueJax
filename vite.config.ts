@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import swc from "@rollup/plugin-swc";
@@ -14,52 +13,6 @@ const port = 31420;
 const SOLID_APP_JSX_MODULE_RE = /src[\\/].*\.[cm]?[jt]sx$/;
 const SOLID_DEPENDENCY_JSX_RE =
   /node_modules[\\/](?:@solidjs[\\/]router|@ark-ui[\\/]solid|lucide-solid|solid-motionone|@dschz[\\/]solid-flow)(?:[\\/].*)?\.jsx$/;
-const ABOUT_PACKAGE_DEPENDENCIES = [
-  "@ark-ui/solid",
-  "@dschz/solid-flow",
-  "@solid-primitives/i18n",
-  "@solidjs/router",
-  "@tauri-apps/api",
-  "@thaterror/core",
-  "@vanilla-extract/css",
-  "i18next",
-  "lucide-solid",
-  "solid-js",
-  "solid-motionone",
-  "solid-zustand",
-  "zod",
-  "zustand",
-] as const;
-const ABOUT_PACKAGE_DEV_DEPENDENCIES = ["typescript", "vite"] as const;
-
-function pickPackageVersions(
-  source: Record<string, string | undefined> | undefined,
-  keys: readonly string[],
-): Record<string, string | undefined> {
-  return Object.fromEntries(keys.map((key) => [key, source?.[key]]));
-}
-
-function resolveAboutPackageMetadata() {
-  const packageJson = JSON.parse(
-    fs.readFileSync(path.resolve(dirname, "package.json"), "utf8"),
-  ) as {
-    version?: string;
-    dependencies?: Record<string, string | undefined>;
-    devDependencies?: Record<string, string | undefined>;
-  };
-
-  return {
-    version: packageJson.version ?? "0.0.0",
-    dependencies: pickPackageVersions(
-      packageJson.dependencies,
-      ABOUT_PACKAGE_DEPENDENCIES,
-    ),
-    devDependencies: pickPackageVersions(
-      packageJson.devDependencies,
-      ABOUT_PACKAGE_DEV_DEPENDENCIES,
-    ),
-  };
-}
 
 export default defineConfig(async ({ command }) => ({
   plugins: [
@@ -132,17 +85,12 @@ export default defineConfig(async ({ command }) => ({
       "@": path.resolve(dirname, "./src"),
     },
   },
-  define: {
-    __LEAGUE_JAX_ABOUT_PACKAGE_METADATA__: JSON.stringify(
-      resolveAboutPackageMetadata(),
-    ),
-  },
   clearScreen: false,
   server: {
     port,
     strictPort: true,
     host: host || false,
     hmr: host ? { protocol: "ws", host, port: port + 1 } : undefined,
-    watch: { ignored: ["**/src-tauri/**"] },
+    watch: { ignored: ["**/src-tauri/**", "**/target/**"] },
   },
 }));

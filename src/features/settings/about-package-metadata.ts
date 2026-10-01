@@ -1,6 +1,7 @@
-import type { PackageMetadata } from "./about-open-source";
+import { dependencies, devDependencies, version } from "../../../package.json";
 
-export const packageMetadata =
-  __LEAGUE_JAX_ABOUT_PACKAGE_METADATA__ as PackageMetadata & {
-    version: string;
-  };
+export const packageMetadata = {
+  version,
+  dependencies,
+  devDependencies,
+};
