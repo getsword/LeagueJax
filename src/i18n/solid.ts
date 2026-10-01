@@ -10,7 +10,7 @@ import type { LocaleCode, LocaleDictionary, LocaleResource } from "./types";
 
 type FlatLocaleDictionary = Record<string, string>;
 
-export type TranslationParams = BaseTemplateArgs;
+export type TranslationParams = BaseTemplateArgs & { lng?: LocaleCode };
 export type SolidTranslate = (
   key: string,
   params?: TranslationParams,
@@ -45,6 +45,8 @@ function toTranslation(value: unknown, key: string): string {
 
 // The controller owns root-level Solid signals because i18n is initialized by
 // runtime shards before any Solid component tree exists.
+// Cache translators per locale so explicit language lookups do not change the
+// UI language, while resource updates invalidate every cached dictionary.
 export function createSolidI18n(
   initialResources: LocaleResource,
   initialLanguage: LocaleCode = "zh-CN",
@@ -53,17 +55,28 @@ export function createSolidI18n(
     equals: false,
   });
   const [language, setLanguage] = createSignal(initialLanguage);
-  const dictionary = createMemo(() =>
-    flattenLocaleDictionary(resources(), language()),
-  );
-  const translate = translator(dictionary, resolveTemplate);
+  const translators = createMemo(() => {
+    const currentResources = resources();
+    const byLanguage: Partial<Record<LocaleCode, SolidTranslate>> = {};
+
+    for (const locale of Object.keys(currentResources) as LocaleCode[]) {
+      const dictionary = flattenLocaleDictionary(currentResources, locale);
+      byLanguage[locale] = translator(() => dictionary, resolveTemplate);
+    }
+
+    return byLanguage;
+  });
 
   return {
     language,
     resources,
     setLanguage,
     setResources,
-    t: (key, params) => toTranslation(translate(key, params), key),
+    t: (key, params) => {
+      const byLanguage = translators();
+      const translate = byLanguage[params?.lng ?? language()] ?? byLanguage.en;
+      return toTranslation(translate?.(key, params), key);
+    },
   };
 }
 
