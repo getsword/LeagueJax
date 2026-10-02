@@ -1,3 +1,4 @@
+import type { OpggRankTier, OpggRegion } from "@/bindings/opgg";
 import type { LocaleResource } from "@/i18n/types";
 
 const championsCopy = {
@@ -7,9 +8,9 @@ const championsCopy = {
     "ja-JP": "チャンピオン",
   },
   source: {
-    en: "OP.GG global ranked, patch {{version}}",
-    "zh-CN": "OP.GG 全球排位，版本 {{version}}",
-    "ja-JP": "OP.GG グローバルランク、パッチ {{version}}",
+    en: "OP.GG · {{region}} · {{rank}} · Patch {{version}}",
+    "zh-CN": "OP.GG · {{region}} · {{rank}} · 版本 {{version}}",
+    "ja-JP": "OP.GG · {{region}} · {{rank}} · パッチ {{version}}",
   },
   search: {
     en: "Search champions",
@@ -130,6 +131,80 @@ const positions = {
   SUPPORT: { en: "Support", "zh-CN": "辅助", "ja-JP": "サポート" },
 } as const;
 
+const regions = {
+  global: { en: "Global", "zh-CN": "全球", "ja-JP": "全地域" },
+  na: { en: "North America", "zh-CN": "北美", "ja-JP": "北米" },
+  me: { en: "Middle East", "zh-CN": "中东", "ja-JP": "中東" },
+  euw: { en: "Europe West", "zh-CN": "西欧", "ja-JP": "西ヨーロッパ" },
+  eune: {
+    en: "Europe Nordic & East",
+    "zh-CN": "东北欧",
+    "ja-JP": "北・東ヨーロッパ",
+  },
+  oce: { en: "Oceania", "zh-CN": "大洋洲", "ja-JP": "オセアニア" },
+  kr: { en: "Korea", "zh-CN": "韩国", "ja-JP": "韓国" },
+  jp: { en: "Japan", "zh-CN": "日本", "ja-JP": "日本" },
+  br: { en: "Brazil", "zh-CN": "巴西", "ja-JP": "ブラジル" },
+  las: {
+    en: "Latin America South",
+    "zh-CN": "拉美南",
+    "ja-JP": "ラテンアメリカ南",
+  },
+  lan: {
+    en: "Latin America North",
+    "zh-CN": "拉美北",
+    "ja-JP": "ラテンアメリカ北",
+  },
+  ru: { en: "Russia", "zh-CN": "俄罗斯", "ja-JP": "ロシア" },
+  tr: { en: "Türkiye", "zh-CN": "土耳其", "ja-JP": "トルコ" },
+  sea: { en: "Southeast Asia", "zh-CN": "东南亚", "ja-JP": "東南アジア" },
+  tw: { en: "Taiwan", "zh-CN": "台湾", "ja-JP": "台湾" },
+  vn: { en: "Vietnam", "zh-CN": "越南", "ja-JP": "ベトナム" },
+} satisfies Record<OpggRegion, Record<"en" | "zh-CN" | "ja-JP", string>>;
+
+const rankTiers = {
+  all: { en: "All ranks", "zh-CN": "所有段位", "ja-JP": "全ランク" },
+  challenger: {
+    en: "Challenger",
+    "zh-CN": "最强王者",
+    "ja-JP": "チャレンジャー",
+  },
+  grandmaster: {
+    en: "Grandmaster",
+    "zh-CN": "傲世宗师",
+    "ja-JP": "グランドマスター",
+  },
+  master_plus: {
+    en: "Master+",
+    "zh-CN": "大师及以上",
+    "ja-JP": "マスター以上",
+  },
+  master: { en: "Master", "zh-CN": "超凡大师", "ja-JP": "マスター" },
+  diamond_plus: {
+    en: "Diamond+",
+    "zh-CN": "钻石及以上",
+    "ja-JP": "ダイヤモンド以上",
+  },
+  diamond: { en: "Diamond", "zh-CN": "璀璨钻石", "ja-JP": "ダイヤモンド" },
+  emerald_plus: {
+    en: "Emerald+",
+    "zh-CN": "翡翠及以上",
+    "ja-JP": "エメラルド以上",
+  },
+  emerald: { en: "Emerald", "zh-CN": "流光翡翠", "ja-JP": "エメラルド" },
+  platinum_plus: {
+    en: "Platinum+",
+    "zh-CN": "铂金及以上",
+    "ja-JP": "プラチナ以上",
+  },
+  platinum: { en: "Platinum", "zh-CN": "华贵铂金", "ja-JP": "プラチナ" },
+  gold_plus: { en: "Gold+", "zh-CN": "黄金及以上", "ja-JP": "ゴールド以上" },
+  gold: { en: "Gold", "zh-CN": "荣耀黄金", "ja-JP": "ゴールド" },
+  silver: { en: "Silver", "zh-CN": "不屈白银", "ja-JP": "シルバー" },
+  bronze: { en: "Bronze", "zh-CN": "英勇黄铜", "ja-JP": "ブロンズ" },
+  iron: { en: "Iron", "zh-CN": "坚韧黑铁", "ja-JP": "アイアン" },
+} satisfies Record<OpggRankTier, Record<"en" | "zh-CN" | "ja-JP", string>>;
+
 function localeTree(locale: "en" | "zh-CN" | "ja-JP") {
   return {
     nav: { champions: championsCopy.title[locale] },
@@ -138,6 +213,12 @@ function localeTree(locale: "en" | "zh-CN" | "ja-JP") {
       source: championsCopy.source[locale],
       search: championsCopy.search[locale],
       allPositions: championsCopy.allPositions[locale],
+      regions: Object.fromEntries(
+        Object.entries(regions).map(([key, labels]) => [key, labels[locale]]),
+      ),
+      rankTiers: Object.fromEntries(
+        Object.entries(rankTiers).map(([key, labels]) => [key, labels[locale]]),
+      ),
       overview: championsCopy.overview[locale],
       champion: championsCopy.champion[locale],
       gameCount: championsCopy.gameCount[locale],

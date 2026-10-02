@@ -8,6 +8,7 @@ export type OpggBuildDto = {
 };
 
 export type OpggChampionDetailDto = {
+  filters: OpggFiltersDto;
   id: number;
   position: string;
   version: string;
@@ -29,6 +30,7 @@ export type OpggChampionDetailDto = {
 };
 
 export type OpggChampionListDto = {
+  filters: OpggFiltersDto;
   version: string;
   champions: Array<OpggChampionSummaryDto>;
 };
@@ -48,9 +50,47 @@ export type OpggCounterDto = {
   winRate: number;
 };
 
+export type OpggFiltersDto = { region: OpggRegion; tier: OpggRankTier };
+
 export type OpggPositionSummaryDto = {
   position: string;
   winRate: number;
   pickRate: number;
   roleRate: number;
 };
+
+export type OpggRankTier =
+  | "all"
+  | "challenger"
+  | "grandmaster"
+  | "master_plus"
+  | "master"
+  | "diamond_plus"
+  | "diamond"
+  | "emerald_plus"
+  | "emerald"
+  | "platinum_plus"
+  | "platinum"
+  | "gold_plus"
+  | "gold"
+  | "silver"
+  | "bronze"
+  | "iron";
+
+export type OpggRegion =
+  | "global"
+  | "na"
+  | "me"
+  | "euw"
+  | "eune"
+  | "oce"
+  | "kr"
+  | "jp"
+  | "br"
+  | "las"
+  | "lan"
+  | "ru"
+  | "tr"
+  | "sea"
+  | "tw"
+  | "vn";

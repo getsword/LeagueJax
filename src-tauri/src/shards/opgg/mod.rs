@@ -9,10 +9,71 @@ const OPGG_CHAMPION_API: &str = "https://lol-api-champion.op.gg";
 const COUNTER_SAMPLE_FLOOR: u32 = 80;
 const COUNTER_COLUMN_LIMIT: usize = 8;
 
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, TS, strum::AsRefStr,
+)]
+#[ts(export, export_to = "opgg.ts")]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum OpggRegion {
+    #[default]
+    Global,
+    Na,
+    Me,
+    Euw,
+    Eune,
+    Oce,
+    Kr,
+    Jp,
+    Br,
+    Las,
+    Lan,
+    Ru,
+    Tr,
+    Sea,
+    Tw,
+    Vn,
+}
+
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, TS, strum::AsRefStr,
+)]
+#[ts(export, export_to = "opgg.ts")]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum OpggRankTier {
+    All,
+    Challenger,
+    Grandmaster,
+    MasterPlus,
+    Master,
+    DiamondPlus,
+    Diamond,
+    #[default]
+    EmeraldPlus,
+    Emerald,
+    PlatinumPlus,
+    Platinum,
+    GoldPlus,
+    Gold,
+    Silver,
+    Bronze,
+    Iron,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "opgg.ts")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct OpggFiltersDto {
+    pub region: OpggRegion,
+    pub tier: OpggRankTier,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "opgg.ts")]
 #[serde(rename_all = "camelCase")]
 pub struct OpggChampionListDto {
+    pub filters: OpggFiltersDto,
     pub version: String,
     pub champions: Vec<OpggChampionSummaryDto>,
 }
@@ -43,6 +104,7 @@ pub struct OpggPositionSummaryDto {
 #[ts(export, export_to = "opgg.ts")]
 #[serde(rename_all = "camelCase")]
 pub struct OpggChampionDetailDto {
+    pub filters: OpggFiltersDto,
     pub id: u32,
     pub position: String,
     pub version: String,
@@ -210,9 +272,10 @@ struct RawCounter {
 pub async fn list_champions(
     client: &reqwest::Client,
     timeout: Duration,
+    filters: OpggFiltersDto,
 ) -> Result<OpggChampionListDto, AppError> {
     let envelope: RawEnvelope<Vec<RawSummary>> =
-        get_json(client, timeout, "/api/global/champions/ranked").await?;
+        get_json(champion_request(client, timeout, filters, None)).await?;
     let mut champions = envelope
         .data
         .into_iter()
@@ -227,6 +290,7 @@ pub async fn list_champions(
     });
 
     Ok(OpggChampionListDto {
+        filters,
         version: envelope.meta.version,
         champions,
     })
@@ -237,11 +301,22 @@ pub async fn champion_detail(
     timeout: Duration,
     champion_id: u32,
     position: &str,
+    filters: OpggFiltersDto,
 ) -> Result<OpggChampionDetailDto, AppError> {
     let position = normalize_position(position)?;
-    let path = format!("/api/global/champions/ranked/{champion_id}/{position}");
-    let envelope: RawEnvelope<RawDetail> = get_json(client, timeout, &path).await?;
-    Ok(detail_dto(envelope.meta.version, position, envelope.data))
+    let envelope: RawEnvelope<RawDetail> = get_json(champion_request(
+        client,
+        timeout,
+        filters,
+        Some((champion_id, &position)),
+    ))
+    .await?;
+    Ok(detail_dto(
+        envelope.meta.version,
+        position,
+        envelope.data,
+        filters,
+    ))
 }
 
 fn summary_dto(summary: RawSummary) -> OpggChampionSummaryDto {
@@ -267,7 +342,12 @@ fn summary_dto(summary: RawSummary) -> OpggChampionSummaryDto {
     }
 }
 
-fn detail_dto(version: String, position: String, detail: RawDetail) -> OpggChampionDetailDto {
+fn detail_dto(
+    version: String,
+    position: String,
+    detail: RawDetail,
+    filters: OpggFiltersDto,
+) -> OpggChampionDetailDto {
     let lane = detail
         .summary
         .positions
@@ -277,6 +357,7 @@ fn detail_dto(version: String, position: String, detail: RawDetail) -> OpggChamp
     let (strong_against, weak_against) = split_matchups(&detail.counters);
 
     OpggChampionDetailDto {
+        filters,
         id: detail.summary.id,
         position,
         version,
@@ -413,17 +494,33 @@ fn normalize_position(position: &str) -> Result<String, AppError> {
     )))
 }
 
-async fn get_json<T: for<'de> Deserialize<'de>>(
+// List and detail requests must use the same region and rank scope. Enum-backed
+// filters keep arbitrary input out of the URL path and query parameters.
+fn champion_request(
     client: &reqwest::Client,
     timeout: Duration,
-    path: &str,
-) -> Result<T, AppError> {
-    let url = format!("{OPGG_CHAMPION_API}{path}?hl=zh_CN");
-    let response = client
-        .get(url)
+    filters: OpggFiltersDto,
+    champion: Option<(u32, &str)>,
+) -> reqwest::RequestBuilder {
+    let base = format!(
+        "{OPGG_CHAMPION_API}/api/{}/champions/ranked",
+        filters.region.as_ref()
+    );
+    let url = match champion {
+        Some((id, position)) => format!("{base}/{id}/{position}"),
+        None => base,
+    };
+    client
+        .get(format!("{url}?hl=zh_CN&tier={}", filters.tier.as_ref()))
         .header("User-Agent", "LeagueJax")
         .header("Accept", "application/json")
         .timeout(timeout)
+}
+
+async fn get_json<T: for<'de> Deserialize<'de>>(
+    request: reqwest::RequestBuilder,
+) -> Result<T, AppError> {
+    let response = request
         .send()
         .await
         .map_err(|error| AppError::other(format!("OP.GG request failed: {error}")))?;
@@ -445,6 +542,121 @@ async fn get_json<T: for<'de> Deserialize<'de>>(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn filters_default_to_global_emerald_plus() {
+        let filters = OpggFiltersDto::default();
+        assert_eq!(filters.region, OpggRegion::Global);
+        assert_eq!(filters.tier, OpggRankTier::EmeraldPlus);
+    }
+
+    #[test]
+    fn supported_filter_values_match_request_serialization(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        for value in [
+            "global", "na", "me", "euw", "eune", "oce", "kr", "jp", "br", "las", "lan", "ru", "tr",
+            "sea", "tw", "vn",
+        ] {
+            let region: OpggRegion = serde_json::from_value(serde_json::json!(value))?;
+            assert_eq!(region.as_ref(), value);
+            assert_eq!(serde_json::to_value(region)?, serde_json::json!(value));
+        }
+        for value in [
+            "all",
+            "challenger",
+            "grandmaster",
+            "master_plus",
+            "master",
+            "diamond_plus",
+            "diamond",
+            "emerald_plus",
+            "emerald",
+            "platinum_plus",
+            "platinum",
+            "gold_plus",
+            "gold",
+            "silver",
+            "bronze",
+            "iron",
+        ] {
+            let tier: OpggRankTier = serde_json::from_value(serde_json::json!(value))?;
+            assert_eq!(tier.as_ref(), value);
+            assert_eq!(serde_json::to_value(tier)?, serde_json::json!(value));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn filters_reject_unsupported_or_incomplete_scopes() {
+        for value in [
+            serde_json::json!({"region": "cn", "tier": "emerald_plus"}),
+            serde_json::json!({"region": "../kr", "tier": "all"}),
+            serde_json::json!({"region": "global", "tier": "unknown"}),
+            serde_json::json!({"region": "global"}),
+        ] {
+            assert!(serde_json::from_value::<OpggFiltersDto>(value).is_err());
+        }
+    }
+
+    #[test]
+    fn list_and_detail_requests_use_identical_filters() -> Result<(), Box<dyn std::error::Error>> {
+        // Tests bypass app startup; an already installed provider is also valid.
+        let _ = rustls::crypto::ring::default_provider().install_default();
+        let client = reqwest::Client::builder().no_proxy().build()?;
+        for (filters, region, tier) in [
+            (OpggFiltersDto::default(), "global", "emerald_plus"),
+            (
+                OpggFiltersDto {
+                    region: OpggRegion::Kr,
+                    tier: OpggRankTier::DiamondPlus,
+                },
+                "kr",
+                "diamond_plus",
+            ),
+            (
+                OpggFiltersDto {
+                    region: OpggRegion::Sea,
+                    tier: OpggRankTier::All,
+                },
+                "sea",
+                "all",
+            ),
+        ] {
+            for (champion, suffix) in [(None, ""), (Some((222, "ADC")), "/222/ADC")] {
+                let request = champion_request(&client, Duration::from_secs(10), filters, champion)
+                    .build()?;
+                assert_eq!(request.url().host_str(), Some("lol-api-champion.op.gg"));
+                assert_eq!(
+                    request.url().path(),
+                    format!("/api/{region}/champions/ranked{suffix}")
+                );
+                let query = request
+                    .url()
+                    .query_pairs()
+                    .collect::<std::collections::HashMap<_, _>>();
+                assert_eq!(query.get("tier").map(|value| value.as_ref()), Some(tier));
+                assert_eq!(query.get("hl").map(|value| value.as_ref()), Some("zh_CN"));
+                assert_eq!(query.len(), 2);
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn detail_preserves_the_requested_scope() -> Result<(), serde_json::Error> {
+        let raw: RawDetail = serde_json::from_value(serde_json::json!({
+            "summary": {"id": 222, "average_stats": {}}
+        }))?;
+        let filters = OpggFiltersDto {
+            region: OpggRegion::Kr,
+            tier: OpggRankTier::DiamondPlus,
+        };
+        let detail = detail_dto("16.19".into(), "ADC".into(), raw, filters);
+        assert_eq!(detail.filters, filters);
+        assert_eq!(detail.id, 222);
+        assert_eq!(detail.position, "ADC");
+        Ok(())
+    }
 
     fn counter(id: i64, win: i64, play: i64) -> RawCounter {
         RawCounter {

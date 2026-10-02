@@ -3,7 +3,7 @@ import { RadioGroup } from "@ark-ui/solid/radio-group";
 import { Key } from "@solid-primitives/keyed";
 import { SearchX, TriangleAlert } from "lucide-solid";
 import { For, Match, Switch } from "solid-js";
-import type { OpggChampionSummaryDto } from "@/bindings/opgg";
+import type { OpggChampionSummaryDto, OpggFiltersDto } from "@/bindings/opgg";
 import { AppTooltip } from "@/components/AppTooltip";
 import { IconTitleSubtitleState } from "@/components/IconTitleSubtitleState";
 import { LazyImage } from "@/components/LazyImage";
@@ -12,6 +12,7 @@ import { SettingsInput } from "@/components/settings-ui";
 import { useSolidTranslation } from "@/i18n/solid";
 import { championIconUrl } from "../assets";
 import { CHAMPION_POSITIONS, laneStats } from "../model";
+import { ChampionFilters } from "./ChampionFilters";
 import * as s from "./ChampionList.css";
 import { ChampionPositionTabs } from "./ChampionPositionTabs";
 import * as shared from "./ChampionPresentation.css";
@@ -22,11 +23,13 @@ export function ChampionList(props: {
   selectedId: number | null;
   query: string;
   lane: string | null;
+  filters: OpggFiltersDto;
   loading: boolean;
   failed: boolean;
   championName: (id: number) => string;
   onQuery: (value: string) => void;
   onLane: (value: string | null) => void;
+  onFiltersChange: (filters: OpggFiltersDto) => void;
   onSelect: (id: number) => void;
 }) {
   const { t } = useSolidTranslation();
@@ -47,6 +50,10 @@ export function ChampionList(props: {
           value={props.query}
           placeholder={t("champions.search")}
           onValueChange={props.onQuery}
+        />
+        <ChampionFilters
+          value={props.filters}
+          onValueChange={props.onFiltersChange}
         />
         <ChampionPositionTabs
           positions={CHAMPION_POSITIONS}

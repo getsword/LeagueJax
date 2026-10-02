@@ -4,6 +4,7 @@ import { For, type JSX, Match, Show, Switch } from "solid-js";
 import type {
   OpggChampionDetailDto,
   OpggChampionSummaryDto,
+  OpggFiltersDto,
 } from "@/bindings/opgg";
 import { IconTitleSubtitleState } from "@/components/IconTitleSubtitleState";
 import { LazyImage } from "@/components/LazyImage";
@@ -86,6 +87,7 @@ export function ChampionDetail(props: {
   failed: boolean;
   failureMessage: string;
   version: string;
+  filters: OpggFiltersDto;
   championName: (id: number) => string;
   itemIcon: (id: number) => string | null;
   spellIcon: (id: number) => string | null;
@@ -121,7 +123,11 @@ export function ChampionDetail(props: {
               </Show>
             </div>
             <p class={s.source}>
-              {t("champions.source", { version: props.version || "—" })}
+              {t("champions.source", {
+                version: props.version || "—",
+                region: t(`champions.regions.${props.filters.region}`),
+                rank: t(`champions.rankTiers.${props.filters.tier}`),
+              })}
             </p>
           </div>
         </div>
