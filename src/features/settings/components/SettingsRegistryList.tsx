@@ -1,9 +1,13 @@
 /** @jsxImportSource solid-js */
-import { type ColumnDef, createColumnHelper } from "@tanstack/solid-table";
 import type { JSX } from "solid-js";
 import { createMemo } from "solid-js";
 import { CopyButton } from "@/components/CopyButton";
-import { DataTable, monospace, mutedCell } from "@/components/DataTable";
+import {
+  createDataTableColumnHelper,
+  DataTable,
+  monospace,
+  mutedCell,
+} from "@/components/DataTable";
 import type { RegisteredSetting } from "@/features/settings/types";
 import { useSolidTranslation } from "@/i18n/solid";
 import * as s from "./SettingsRegistryList.css.ts";
@@ -44,7 +48,7 @@ const toScope = (scope?: RegisteredSetting["scope"]): string => {
   }
 };
 
-const columnHelper = createColumnHelper<RegisteredSetting>();
+const columnHelper = createDataTableColumnHelper<RegisteredSetting>();
 
 // Table render callbacks run as untracked Solid component setup, so translated
 // text must live in JSX bindings to keep reacting to language changes.
@@ -61,10 +65,8 @@ export function SettingsRegistryList(
     );
   });
 
-  // biome-ignore lint/suspicious/noExplicitAny: TanStack Table's second generic varies per column.
-  const columns = createMemo<ColumnDef<RegisteredSetting, any>[]>(() => {
-    // biome-ignore lint/suspicious/noExplicitAny: TanStack Table's second generic varies per column.
-    const cols: ColumnDef<RegisteredSetting, any>[] = [
+  const columns = createMemo(() => {
+    const cols = columnHelper.columns([
       columnHelper.accessor("id", {
         header: () => (
           <span>
@@ -82,7 +84,7 @@ export function SettingsRegistryList(
           );
         },
       }),
-    ];
+    ]);
 
     if (showCurrentLanguageColumn()) {
       cols.push(

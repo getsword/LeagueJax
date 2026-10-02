@@ -1,9 +1,8 @@
 /** @jsxImportSource solid-js */
-import type { ColumnDef } from "@tanstack/solid-table";
 import { createMemo } from "solid-js";
 import type { OpggCounterDto } from "@/bindings/opgg";
 import { AppTooltip } from "@/components/AppTooltip";
-import { DataTable } from "@/components/DataTable";
+import { DataTable, type DataTableColumnDef } from "@/components/DataTable";
 import { LazyImage } from "@/components/LazyImage";
 import { useSolidTranslation } from "@/i18n/solid";
 import { championIconUrl } from "../assets";
@@ -19,7 +18,7 @@ function MatchupTable(props: {
   championName: (id: number) => string;
 }) {
   const { t } = useSolidTranslation();
-  const columns = createMemo<ColumnDef<OpggCounterDto>[]>(() => [
+  const columns = createMemo<DataTableColumnDef<OpggCounterDto>[]>(() => [
     {
       id: "champion",
       header: t("champions.champion"),

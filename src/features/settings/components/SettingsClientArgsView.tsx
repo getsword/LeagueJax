@@ -1,9 +1,8 @@
 /** @jsxImportSource solid-js */
-import { type ColumnDef, createColumnHelper } from "@tanstack/solid-table";
 import type { JSX } from "solid-js";
 import { createMemo } from "solid-js";
 import type { LeagueClientCmdArgs } from "@/bindings/lcu.ts";
-import { DataTable } from "@/components/DataTable";
+import { createDataTableColumnHelper, DataTable } from "@/components/DataTable";
 import * as dt from "@/components/DataTable/DataTable.css.ts";
 import { useSolidTranslation } from "@/i18n/solid";
 import { useSolidLcuStore } from "@/stores/lcu";
@@ -63,8 +62,10 @@ const toCmdLine = (
   return `"${executable}" ${segments.join(" ")}`.trim();
 };
 
-const col = createColumnHelper<CmdArgRow>();
+const col = createDataTableColumnHelper<CmdArgRow>();
 
+// Solid table templates run as component setup; JSX bindings keep translated
+// headers reactive without rebuilding the column definitions on locale changes.
 export function SettingsClientArgsView(): JSX.Element {
   const { t } = useSolidTranslation();
   const focused = useSolidLcuStore((state) =>
@@ -83,26 +84,33 @@ export function SettingsClientArgsView(): JSX.Element {
     return toCmdLine(focused()?.cmdArgs, focused()?.installDir);
   });
 
-  // biome-ignore lint/suspicious/noExplicitAny: TanStack Table's second generic varies per column.
-  const columns = createMemo<ColumnDef<CmdArgRow, any>[]>(() => [
-    col.accessor("key", {
-      header: () =>
-        t("settings.clientArgs.columns.key", {
-          defaultValue: "Key",
-        }),
-      size: 280,
-      meta: { className: dt.monospace },
-      cell: (info) => info.getValue(),
-    }),
-    col.accessor("value", {
-      header: () =>
-        t("settings.clientArgs.columns.value", {
-          defaultValue: "Value",
-        }),
-      meta: { className: dt.monospace },
-      cell: (info) => info.getValue(),
-    }),
-  ]);
+  const columns = createMemo(() =>
+    col.columns([
+      col.accessor("key", {
+        header: () => (
+          <span>
+            {t("settings.clientArgs.columns.key", {
+              defaultValue: "Key",
+            })}
+          </span>
+        ),
+        size: 280,
+        meta: { className: dt.monospace },
+        cell: (info) => info.getValue(),
+      }),
+      col.accessor("value", {
+        header: () => (
+          <span>
+            {t("settings.clientArgs.columns.value", {
+              defaultValue: "Value",
+            })}
+          </span>
+        ),
+        meta: { className: dt.monospace },
+        cell: (info) => info.getValue(),
+      }),
+    ]),
+  );
 
   return (
     <div class={s.page}>

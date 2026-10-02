@@ -2,25 +2,28 @@
 import { keyArray } from "@solid-primitives/keyed";
 import {
   type Column,
-  type ColumnDef,
-  createSolidTable,
-  flexRender,
-  getCoreRowModel,
-  type Row,
+  createTable,
+  FlexRender,
+  type RowData,
 } from "@tanstack/solid-table";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import type { JSX } from "solid-js";
 import { Show } from "solid-js";
 import { ScrollArea } from "@/components/scroll-area";
 import * as s from "./DataTable.css.ts";
+import {
+  type DataTableColumnDef,
+  type DataTableRow,
+  dataTableFeatures,
+} from "./table-config";
 
-interface DataTableProps<T> {
+interface DataTableProps<T extends RowData> {
   className?: string;
   data: T[];
-  // biome-ignore lint/suspicious/noExplicitAny: TanStack Table's second generic varies per column.
-  columns: ColumnDef<T, any>[];
+  // biome-ignore lint/suspicious/noExplicitAny: Each column can have a different accessor value type.
+  columns: DataTableColumnDef<T, any>[];
   emptyText?: string;
-  getRowClassName?: (row: Row<T>) => string | undefined;
+  getRowClassName?: (row: DataTableRow<T>) => string | undefined;
   // Requires a bounded parent; only the table body owns a scroll viewport.
   stickyHeader?: boolean;
   // Outset tracks require a reserved gutter outside the table frame.
@@ -33,7 +36,9 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
 }
 
 // Each layout table needs its own DOM nodes but shares the same column sizing.
-function TableColumns<T>(props: { columns: Column<T>[] }): JSX.Element {
+function TableColumns<T extends RowData>(props: {
+  columns: Column<typeof dataTableFeatures, T>[];
+}): JSX.Element {
   const colNodes = keyArray(
     () => props.columns,
     (col) => col.id,
@@ -59,16 +64,18 @@ function TableColumns<T>(props: { columns: Column<T>[] }): JSX.Element {
 
 // Fixed mode separates the header from scrolling without duplicating it. The
 // layout tables are presentational so their explicit rows form one ARIA table.
-export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
+export function DataTable<T extends RowData>(
+  props: DataTableProps<T>,
+): JSX.Element {
   const scrollbarMode = () => props.scrollbarMode ?? "inline";
-  const table = createSolidTable({
+  const table = createTable({
+    features: dataTableFeatures,
     get data() {
       return props.data;
     },
     get columns() {
       return props.columns;
     },
-    getCoreRowModel: getCoreRowModel(),
   });
   const headerRows = keyArray(
     () => table.getHeaderGroups(),
@@ -78,10 +85,7 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
         () => headerGroup().headers,
         (header) => header.id,
         (header) => {
-          const meta = () =>
-            header().column.columnDef.meta as
-              | { className?: string }
-              | undefined;
+          const meta = () => header().column.columnDef.meta;
           const cls = () => joinClassNames(s.headCell, meta()?.className);
           return (
             <th
@@ -90,12 +94,9 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
               colSpan={header().colSpan}
               scope={header().colSpan > 1 ? "colgroup" : "col"}
             >
-              {header().isPlaceholder
-                ? null
-                : flexRender(
-                    header().column.columnDef.header,
-                    header().getContext(),
-                  )}
+              <Show when={!header().isPlaceholder}>
+                <FlexRender header={header()} />
+              </Show>
             </th>
           );
         },
@@ -113,15 +114,14 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
         () => row().getVisibleCells(),
         (cell) => cell.id,
         (cell) => {
-          const meta = () =>
-            cell().column.columnDef.meta as { className?: string } | undefined;
+          const meta = () => cell().column.columnDef.meta;
           const cls = () =>
             meta()?.className
               ? `${s.bodyCell} ${meta()?.className}`
               : s.bodyCell;
           return (
             <td class={cls()} role={props.stickyHeader ? "cell" : undefined}>
-              {flexRender(cell().column.columnDef.cell, cell().getContext())}
+              <FlexRender cell={cell()} />
             </td>
           );
         },
