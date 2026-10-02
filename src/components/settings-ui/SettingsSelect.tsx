@@ -5,6 +5,7 @@ import { Check, ChevronsUpDown } from "lucide-solid";
 import type { JSX } from "solid-js";
 import { Show, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
+import { visuallyHidden } from "@/styles/accessibility.css";
 import {
   type SettingsControlProps,
   type SettingsControlSlotProps,
@@ -28,6 +29,7 @@ type SelectGroup = {
 };
 
 interface SettingsSelectOwnProps {
+  ariaLabel: string;
   value: string[];
   onValueChange: NonNullable<Select.RootProps<SelectItem>["onValueChange"]>;
   placeholder?: string;
@@ -118,6 +120,8 @@ function SelectGroupItems(props: {
   return <>{items()}</>;
 }
 
+// Only named groups expose group semantics; unnamed groups are visual dividers
+// and must not reference Ark's unrendered group label.
 function GroupedItems(props: {
   groups: SelectGroup[];
   collection: SettingsSelectProps["collection"];
@@ -129,20 +133,37 @@ function GroupedItems(props: {
       group.label ??
       group.items.map((item) => item.value).join("|"),
     (group) => (
-      <Select.ItemGroup class={s.group}>
-        <SelectGroupItems group={group()} collection={props.collection} />
-      </Select.ItemGroup>
+      <Show
+        when={group().label}
+        fallback={
+          <div class={s.group}>
+            <SelectGroupItems group={group()} collection={props.collection} />
+          </div>
+        }
+      >
+        {(label) => (
+          <Select.ItemGroup class={s.group}>
+            <Select.ItemGroupLabel class={visuallyHidden}>
+              {label()}
+            </Select.ItemGroupLabel>
+            <SelectGroupItems group={group()} collection={props.collection} />
+          </Select.ItemGroup>
+        )}
+      </Show>
     ),
   );
 
   return <>{groups()}</>;
 }
 
+// Ark links the trigger, native select and popup to one label. Keep that label
+// mounted even when the popup is closed, without adding visible form chrome.
 export function SettingsSelect(props: SettingsSelectProps): JSX.Element {
   const [layout, local, rootProps] = splitProps(
     props,
     settingsControlLayoutKeys,
     [
+      "ariaLabel",
       "placeholder",
       "formatValue",
       "groups",
@@ -183,6 +204,7 @@ export function SettingsSelect(props: SettingsSelectProps): JSX.Element {
         ...rootProps.positioning,
       }}
     >
+      <Select.Label class={visuallyHidden}>{local.ariaLabel}</Select.Label>
       <Select.HiddenSelect {...local.hiddenSelectProps} />
       <Select.Control class={s.control}>
         <Select.Trigger {...local.triggerProps} class={s.trigger}>

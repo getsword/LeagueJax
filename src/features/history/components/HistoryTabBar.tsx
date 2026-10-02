@@ -162,6 +162,8 @@ function getContextTabId(event: MouseEvent): string | null {
   );
 }
 
+// Closed Ark menus reference a regular trigger, but this menu only has a context
+// trigger. Unmount closed content so its label reference is never dangling.
 export function HistoryTabBar(): JSX.Element {
   const { t } = useSolidTranslation();
   const tabs = useSolidTabStore((state) => state.tabs);
@@ -230,7 +232,11 @@ export function HistoryTabBar(): JSX.Element {
   );
 
   return (
-    <Menu.Root positioning={{ placement: "bottom-start", strategy: "fixed" }}>
+    <Menu.Root
+      lazyMount
+      unmountOnExit
+      positioning={{ placement: "bottom-start", strategy: "fixed" }}
+    >
       <div class={s.container}>
         <div
           data-scrollbar="hidden"

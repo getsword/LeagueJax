@@ -60,7 +60,10 @@ const toScopeTag = (scope?: SettingScope): string => {
   }
 };
 
-function SelectField(props: { field: RegisteredSelectSetting }): JSX.Element {
+function SelectField(props: {
+  ariaLabel: string;
+  field: RegisteredSelectSetting;
+}): JSX.Element {
   const settings = useSolidSettings();
   const { t } = useSolidTranslation();
   const value = useSolidSettingValue(props.field.id);
@@ -75,6 +78,7 @@ function SelectField(props: { field: RegisteredSelectSetting }): JSX.Element {
 
   return (
     <SettingsSelect
+      ariaLabel={props.ariaLabel}
       collection={collection()}
       value={[String(value() ?? "")]}
       onValueChange={(details) => {
@@ -217,7 +221,10 @@ export function SettingsFieldRenderer(props: {
           settingId={props.field.id}
           scopeTag={scopeTag()}
         >
-          <SelectField field={props.field as RegisteredSelectSetting} />
+          <SelectField
+            ariaLabel={ariaLabel()}
+            field={props.field as RegisteredSelectSetting}
+          />
         </SettingsFieldRow>
       );
     case "toggle":

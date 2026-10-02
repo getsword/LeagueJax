@@ -25,6 +25,7 @@ export function CounterPositionSelect(props: {
   );
   return (
     <SettingsSelect
+      ariaLabel={`Select counter position for enemy slot ${props.cellId}`}
       size="sm"
       fit="content"
       collection={collection()}
@@ -36,9 +37,6 @@ export function CounterPositionSelect(props: {
             })
           : label
       }
-      triggerProps={{
-        "aria-label": `Select counter position for enemy slot ${props.cellId}`,
-      }}
       positioning={{ sameWidth: false }}
       onValueChange={({ value }) => {
         const next = value[0];

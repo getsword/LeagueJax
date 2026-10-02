@@ -25,6 +25,7 @@ export function SearchForm(props: SearchFormProps): JSX.Element {
     >
       <Show when={props.server.show()}>
         <SettingsSelect
+          ariaLabel="Search server"
           collection={props.server.collection()}
           groups={props.server.groups()}
           value={[props.server.selectedId()]}

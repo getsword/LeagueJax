@@ -4,6 +4,7 @@ import { For, Show } from "solid-js";
 import { AppTooltip } from "@/components/AppTooltip";
 import { LeaguePositionIcon } from "@/components/league-position/LeaguePositionIcon";
 import { useSolidTranslation } from "@/i18n/solid";
+import { visuallyHidden } from "@/styles/accessibility.css";
 import * as s from "./ChampionPositionTabs.css";
 
 // Keep tooltip props on inner content: both Ark primitives expose data-state,
@@ -35,6 +36,9 @@ export function ChampionPositionTabs(props: {
           props.onValueChange(details.value === "ALL" ? null : details.value);
       }}
     >
+      <SegmentGroup.Label class={visuallyHidden}>
+        {props.ariaLabel}
+      </SegmentGroup.Label>
       <For each={options()}>
         {(position) => (
           <SegmentGroup.Item
@@ -42,6 +46,9 @@ export function ChampionPositionTabs(props: {
             value={position}
           >
             <SegmentGroup.ItemText>
+              <Show when={props.compact && position !== "ALL"}>
+                <span class={visuallyHidden}>{label(position)}</span>
+              </Show>
               <AppTooltip content={label(position)} disabled={!props.compact}>
                 {(triggerProps) => (
                   <span {...triggerProps<HTMLSpanElement>({ class: s.text })}>

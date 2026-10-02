@@ -45,14 +45,14 @@ function MatchupTable(props: {
     {
       id: "winRate",
       header: t("champions.winRate"),
-      size: 100,
+      size: 80,
       meta: { className: s.numericCell },
       cell: (context) => <ChampionRate value={context.row.original.winRate} />,
     },
     {
       id: "games",
       header: t("champions.gameCount"),
-      size: 100,
+      size: 65,
       meta: { className: s.numericCell },
       cell: (context) => String(context.row.original.play),
     },

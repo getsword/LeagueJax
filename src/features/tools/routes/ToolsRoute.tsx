@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import type { JSX } from "solid-js";
 import { createMemo, For } from "solid-js";
 import { useSolidTranslation } from "@/i18n/solid";
+import { visuallyHidden } from "@/styles/accessibility.css";
 import * as s from "./ToolsRoute.css.ts";
 
 type ToolsPage = "claim" | "mcp";
@@ -43,6 +44,9 @@ export function ToolsRoute(props: { children?: JSX.Element }): JSX.Element {
           }
         }}
       >
+        <SegmentGroup.Label class={visuallyHidden}>
+          Tools pages
+        </SegmentGroup.Label>
         <For each={pages}>
           {(item) => (
             <SegmentGroup.Item class={s.segmentItem} value={item.value}>

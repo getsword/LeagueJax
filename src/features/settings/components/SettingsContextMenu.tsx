@@ -33,6 +33,8 @@ const isResettableSetting = (field: RegisteredSetting): boolean => {
   return field.control.kind !== "action";
 };
 
+// Closed Ark menus reference a regular trigger, but this menu only has a context
+// trigger. Unmount closed content so its label reference is never dangling.
 export function SettingsContextMenu(
   props: SettingsContextMenuProps,
 ): JSX.Element {
@@ -138,7 +140,11 @@ export function SettingsContextMenu(
   };
 
   return (
-    <Menu.Root positioning={{ placement: "bottom-start", strategy: "fixed" }}>
+    <Menu.Root
+      lazyMount
+      unmountOnExit
+      positioning={{ placement: "bottom-start", strategy: "fixed" }}
+    >
       <Menu.ContextTrigger
         asChild={(getTriggerProps) => (
           <div

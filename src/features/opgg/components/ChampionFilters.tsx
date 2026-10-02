@@ -36,11 +36,11 @@ export function ChampionFilters(props: {
   return (
     <div class={s.filters}>
       <SettingsSelect
+        ariaLabel="Filter champions by rank"
         name="champions.rankTier"
         collection={tiers()}
         value={[props.value.tier]}
         triggerProps={{
-          "aria-label": "Filter champions by rank",
           title: t(`champions.rankTiers.${props.value.tier}`),
         }}
         positioning={{ sameWidth: false }}
@@ -51,11 +51,11 @@ export function ChampionFilters(props: {
         }}
       />
       <SettingsSelect
+        ariaLabel="Filter champions by region"
         name="champions.region"
         collection={regions()}
         value={[props.value.region]}
         triggerProps={{
-          "aria-label": "Filter champions by region",
           title: t(`champions.regions.${props.value.region}`),
         }}
         positioning={{ sameWidth: false }}

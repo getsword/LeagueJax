@@ -10,6 +10,7 @@ import { LazyImage } from "@/components/LazyImage";
 import { ScrollArea } from "@/components/scroll-area";
 import { SettingsInput } from "@/components/settings-ui";
 import { useSolidTranslation } from "@/i18n/solid";
+import { visuallyHidden } from "@/styles/accessibility.css";
 import { championIconUrl } from "../assets";
 import { CHAMPION_POSITIONS, laneStats } from "../model";
 import { ChampionFilters } from "./ChampionFilters";
@@ -114,6 +115,9 @@ export function ChampionList(props: {
                 if (details.value) props.onSelect(Number(details.value));
               }}
             >
+              <RadioGroup.Label class={visuallyHidden}>
+                Champions
+              </RadioGroup.Label>
               <Key each={props.champions} by="id">
                 {(champion) => (
                   <RadioGroup.Item class={s.row} value={String(champion().id)}>
@@ -123,15 +127,16 @@ export function ChampionList(props: {
                       className={s.portrait}
                       fallbackClassName={`${s.portrait} ${shared.skeleton}`}
                     />
-                    <AppTooltip content={props.championName(champion().id)}>
-                      {(triggerProps) => (
-                        <RadioGroup.ItemText
-                          {...triggerProps<HTMLSpanElement>({ class: s.name })}
-                        >
-                          {props.championName(champion().id)}
-                        </RadioGroup.ItemText>
-                      )}
-                    </AppTooltip>
+                    {/* Separate nodes preserve both the radio label ID and the tooltip trigger ID. */}
+                    <RadioGroup.ItemText class={s.name}>
+                      <AppTooltip content={props.championName(champion().id)}>
+                        {(triggerProps) => (
+                          <span {...triggerProps<HTMLSpanElement>()}>
+                            {props.championName(champion().id)}
+                          </span>
+                        )}
+                      </AppTooltip>
+                    </RadioGroup.ItemText>
                     <ChampionRate
                       value={
                         (props.lane

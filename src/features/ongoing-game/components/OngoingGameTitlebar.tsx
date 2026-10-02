@@ -189,6 +189,7 @@ export function OngoingGameTitlebar() {
       <div class={s.controls}>
         <div class={s.filterSelect}>
           <SettingsSelect
+            ariaLabel="Filter player match history by mode"
             collection={collection()}
             groups={groups()}
             value={[selectedValue()]}

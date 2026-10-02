@@ -30,6 +30,7 @@ export function MatchListFilters(props: {
   return (
     <>
       <SettingsSelect
+        ariaLabel="Filter match history by mode"
         collection={modeCollection()}
         value={[props.modeTag]}
         disabled={props.disabled}
@@ -44,6 +45,7 @@ export function MatchListFilters(props: {
       <div></div>
 
       <SettingsSelect
+        ariaLabel="Match history page size"
         collection={pageSizeCollection()}
         value={[String(props.pageSize)]}
         disabled={props.disabled}
