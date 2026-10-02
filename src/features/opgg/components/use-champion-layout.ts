@@ -8,9 +8,9 @@ export function useChampionLayout() {
 
   onMount(() => {
     if (!element) return;
-    setStacked(element.getBoundingClientRect().width < 600);
+    setStacked(element.getBoundingClientRect().width < 750);
     const observer = new ResizeObserver(([entry]) => {
-      if (entry) setStacked(entry.contentRect.width < 600);
+      if (entry) setStacked(entry.contentRect.width < 750);
     });
     observer.observe(element);
     onCleanup(() => observer.disconnect());

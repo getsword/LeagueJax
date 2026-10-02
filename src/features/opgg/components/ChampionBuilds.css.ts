@@ -3,7 +3,7 @@ import { theme } from "@/styles/theme.css";
 
 export const content = style({
   display: "grid",
-  gap: 12,
+  gap: 6,
   minWidth: 0,
   containerType: "inline-size",
   containerName: "champion-builds",
@@ -76,7 +76,7 @@ export const level = style({
 export const skillStats = style({
   display: "flex",
   flexWrap: "wrap",
-  gap: 12,
+  gap: 6,
   fontSize: "0.75rem",
 });
 export const buildRow = style({
@@ -93,6 +93,14 @@ export const buildRow = style({
     },
   },
 });
+export const situationalRow = style([
+  buildRow,
+  {
+    borderTop: `1px solid ${theme.color.border}`,
+    marginTop: 6,
+    paddingTop: 12,
+  },
+]);
 export const buildLabel = style({
   gridColumn: "1 / -1",
   "@container": {
@@ -119,10 +127,4 @@ export const buildHeading = style({
   alignItems: "baseline",
   gap: 12,
 });
-export const builds = style({ display: "grid", gap: 10 });
-export const later = style({
-  display: "grid",
-  gap: 10,
-  paddingTop: 10,
-  borderTop: `1px solid ${theme.color.border}`,
-});
+export const builds = style({ display: "grid", gap: 4 });

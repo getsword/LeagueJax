@@ -140,9 +140,9 @@ export const body = recipe({
       },
       false: {
         gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-        gridTemplateRows: "minmax(0, 1fr) minmax(0, 1.2fr)",
+        gridTemplateRows: "auto 1fr",
         columnGap: 24,
-        paddingInlineEnd: 12,
+        // paddingInlineEnd: 12,
         height: "100%",
       },
     },

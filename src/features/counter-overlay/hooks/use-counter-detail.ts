@@ -5,7 +5,7 @@ import type {
   OpggChampionDetailDto,
   OpggChampionListDto,
 } from "@/bindings/opgg";
-import { preferredPosition } from "@/features/champions/model";
+import { preferredPosition } from "@/features/opgg/model";
 import { createSolidQuery } from "@/infra/solid-query";
 
 async function loadCounterDetail(

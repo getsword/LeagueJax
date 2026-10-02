@@ -2,7 +2,7 @@
 import { Key } from "@solid-primitives/keyed";
 import { invoke } from "@tauri-apps/api/core";
 import { Show } from "solid-js";
-import { useChampionAssets } from "@/features/champions/assets";
+import { useChampionAssets } from "@/features/opgg/assets";
 import { useSolidTranslation } from "@/i18n/solid";
 import { CounterPickSection } from "../components/CounterPickSection";
 import { useEnemyPicks } from "../hooks/use-enemy-picks";

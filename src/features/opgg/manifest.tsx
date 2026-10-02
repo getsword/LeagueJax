@@ -1,9 +1,9 @@
 /** @jsxImportSource solid-js */
-import { Swords } from "lucide-solid";
 import { lazy } from "solid-js";
 import type { Jax } from "@/jax";
 import type { SolidWebShard } from "@/runtime/solid-web-contract";
 import { SHARD_IDS } from "../shard-ids";
+import { OpggIcon } from "./components/OpggIcon";
 import { championsI18n } from "./i18n";
 
 const ChampionsRoute = lazy(() => import("./routes/ChampionsRoute"));
@@ -26,7 +26,7 @@ export class SolidChampionsShard implements SolidWebShard {
   public routes() {
     return [
       {
-        path: "champions",
+        path: "opgg",
         component: ChampionsRoute,
         order: 20,
       },
@@ -36,11 +36,11 @@ export class SolidChampionsShard implements SolidWebShard {
   public navItems() {
     return [
       {
-        to: "/main/champions",
+        to: "/main/opgg",
         labelKey: "nav.champions",
-        icon: Swords,
+        icon: OpggIcon,
         section: "main" as const,
-        order: 20,
+        order: 25,
       },
     ];
   }

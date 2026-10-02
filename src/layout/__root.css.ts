@@ -82,6 +82,7 @@ const navBase: StyleRule = {
   borderRadius: 6,
   height: 36,
   fontSize: "0.95rem",
+  fontWeight: 400,
   color: theme.color.mutedForeground,
   transition: "color 80ms ease-out",
   whiteSpace: "nowrap",
@@ -125,7 +126,6 @@ export const navItem = recipe({
       style: {
         background: theme.color.blurry,
         color: theme.color.accentForeground,
-        fontWeight: 500,
         selectors: {
           "&::before": {
             content: '""',
@@ -145,7 +145,6 @@ export const navItem = recipe({
       style: {
         background: `oklch(from ${theme.color.primary} l c h / 0.15)`,
         color: theme.color.primary,
-        fontWeight: 500,
         selectors: {
           "&:hover": {
             background: `oklch(from ${theme.color.primary} l c h / 0.15)`,

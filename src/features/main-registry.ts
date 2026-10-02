@@ -1,12 +1,12 @@
 import type { SolidWebShard } from "@/runtime/solid-web-contract";
 import { SolidAutomationShard } from "./automation/manifest";
-import { SolidChampionsShard } from "./champions/manifest";
 import { SolidHistoryShard } from "./history/manifest";
 import { I18nRuntimeShard } from "./i18n/runtime-shard";
 import { SolidMcpFeature } from "./mcp/manifest";
 import { SolidMiniShard } from "./mini/manifest";
 import { SolidNotificationsShard } from "./notifications/manifest";
 import { SolidOngoingGameShard } from "./ongoing-game/manifest";
+import { SolidChampionsShard } from "./opgg/manifest";
 import { SolidReplayShard } from "./replay/manifest";
 import { SolidSettingsShard } from "./settings/solid-settings-shard";
 import { SolidShellShard } from "./shell/manifest";

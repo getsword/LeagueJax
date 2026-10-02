@@ -189,7 +189,7 @@ export function ChampionBuilds(props: {
         </Index>
       </div>
       <Show when={props.detail.lastItems.length > 0}>
-        <div class={s.later}>
+        <div class={s.situationalRow}>
           <h3 class={shared.sectionLabel}>{t("champions.situational")}</h3>
           <div class={s.icons}>
             <Index each={props.detail.lastItems}>

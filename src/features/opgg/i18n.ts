@@ -207,7 +207,7 @@ const rankTiers = {
 
 function localeTree(locale: "en" | "zh-CN" | "ja-JP") {
   return {
-    nav: { champions: championsCopy.title[locale] },
+    nav: { champions: "OP.GG" },
     champions: {
       title: championsCopy.title[locale],
       source: championsCopy.source[locale],
