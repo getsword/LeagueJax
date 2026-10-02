@@ -64,7 +64,7 @@ function verticalScrollbarStyle(mode: ScrollAreaMode): JSX.CSSProperties {
     top: "0",
     bottom: "0",
     "inset-inline-end":
-      mode === "outset" ? `calc(0px - ${s.scrollAreaOutsetWidthValue})` : "0",
+      mode === "outset" ? `calc(0px - ${s.scrollAreaOutsetSizeValue})` : "0",
   };
 }
 
@@ -73,7 +73,7 @@ function horizontalScrollbarStyle(mode: ScrollAreaMode): JSX.CSSProperties {
     "inset-inline-start": "0",
     "inset-inline-end": "0",
     bottom:
-      mode === "outset" ? `calc(0px - ${s.scrollAreaOutsetWidthValue})` : "0",
+      mode === "outset" ? `calc(0px - ${s.scrollAreaOutsetSizeValue})` : "0",
   };
 }
 

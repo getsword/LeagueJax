@@ -4,7 +4,7 @@ import { theme } from "@/styles/theme.css";
 export const scrollAreaOutsetWidth = createVar();
 export const scrollAreaScrollbarSize = createVar();
 
-export const scrollAreaOutsetWidthValue = fallbackVar(
+export const scrollAreaOutsetSizeValue = fallbackVar(
   scrollAreaOutsetWidth,
   "12px",
 );
@@ -52,7 +52,7 @@ export const verticalScrollbar = style({
       width: scrollAreaScrollbarSizeValue,
     },
     '&[data-scroll-mode="outset"]': {
-      width: scrollAreaOutsetWidthValue,
+      width: scrollAreaOutsetSizeValue,
     },
   },
 });
@@ -68,7 +68,7 @@ export const horizontalScrollbar = style({
       height: scrollAreaScrollbarSizeValue,
     },
     '&[data-scroll-mode="outset"]': {
-      height: scrollAreaOutsetWidthValue,
+      height: scrollAreaOutsetSizeValue,
     },
   },
 });
