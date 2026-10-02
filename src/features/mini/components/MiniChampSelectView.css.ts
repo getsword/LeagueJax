@@ -5,7 +5,7 @@ const panelBackground = "oklch(0 0 0 / 0.12)";
 
 export const root = style({
   display: "grid",
-  gridTemplateRows: "auto auto 1fr auto",
+  gridTemplateRows: "auto auto minmax(0, 1fr)",
   height: "100%",
   minHeight: 0,
   gap: "8px",
@@ -183,8 +183,4 @@ export const statusMeta = style({
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
-});
-
-export const spacer = style({
-  minHeight: 0,
 });

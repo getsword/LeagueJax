@@ -7,15 +7,12 @@ import { useSolidTranslation } from "@/i18n/solid";
 import {
   ACCEPT_DELAY_SECONDS_SETTING_ID,
   AUTO_ACCEPT_SETTING_ID,
-  MiniBottomPanel,
   useSolidAutoAcceptCountdown,
   useSolidMiniSettingValue,
 } from "../components/MiniBottomPanel";
 import { MiniChampSelectView } from "../components/MiniChampSelectView";
-import {
-  type MiniWindowModel,
-  useSolidMiniWindowModel,
-} from "../hooks/use-mini-window-model";
+import type { MiniChampSelectActions } from "../hooks/use-mini-champ-select-actions";
+import type { MiniWindowModel } from "../hooks/use-mini-window-model";
 import * as s from "./MiniRoute.css";
 
 function phaseLabelKey(model: MiniWindowModel): string {
@@ -26,8 +23,12 @@ function phaseLabelKey(model: MiniWindowModel): string {
   return `mini.phase.${uncapitalize(model.phase)}`;
 }
 
-export function MiniRoute() {
-  const model = useSolidMiniWindowModel();
+export function MiniRoute(props: {
+  model: MiniWindowModel;
+  actions: MiniChampSelectActions;
+  active: boolean;
+}) {
+  const model = () => props.model;
   const { t } = useSolidTranslation();
   const autoAccept = useSolidMiniSettingValue<boolean>(AUTO_ACCEPT_SETTING_ID);
   const acceptDelay = useSolidMiniSettingValue<number>(
@@ -82,12 +83,14 @@ export function MiniRoute() {
               </Show>
             </div>
           </div>
-
-          <MiniBottomPanel model={model()} />
         </section>
       }
     >
-      <MiniChampSelectView model={model()} />
+      <MiniChampSelectView
+        model={model()}
+        actions={props.actions}
+        active={props.active}
+      />
     </Show>
   );
 }

@@ -6,6 +6,7 @@ import { SolidMcpFeature } from "./mcp/manifest";
 import { SolidMiniShard } from "./mini/manifest";
 import { SolidNotificationsShard } from "./notifications/manifest";
 import { SolidOngoingGameShard } from "./ongoing-game/manifest";
+import { SolidChampionsShard } from "./opgg/manifest";
 import { SolidReplayShard } from "./replay/manifest";
 import { SolidSettingsShard } from "./settings/solid-settings-shard";
 import { SolidShellShard } from "./shell/manifest";
@@ -29,6 +30,7 @@ export function createSolidMainWebShards(): SolidWebShard[] {
     new SolidTrayShard(),
     new SolidMiniShard(),
     new SolidHistoryShard(),
+    new SolidChampionsShard(),
     new SolidReplayShard(),
     new SolidOngoingGameShard(),
     new SolidAutomationShard(),

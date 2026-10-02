@@ -37,6 +37,7 @@ fn idle_snapshot() -> OngoingGameUpdated {
         ready_check: None,
         champ_select_session: None,
         team_members: Vec::new(),
+        enemy_champion_picks: Vec::new(),
     }
 }
 

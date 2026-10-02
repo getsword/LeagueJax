@@ -11,6 +11,7 @@ pub mod mcp;
 pub mod mini_window;
 pub mod network;
 pub mod ongoing_game;
+pub mod opgg;
 pub mod persistence_sled;
 pub mod replay;
 pub mod saved_player;

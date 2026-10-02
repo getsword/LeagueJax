@@ -1,4 +1,5 @@
 import { style } from "@vanilla-extract/css";
+import * as tabStrip from "@/components/tab-strip/TabStrip.css";
 import { theme } from "@/styles/theme.css";
 
 export const page = style({
@@ -67,59 +68,12 @@ export const primaryTabsRoot = style({
   minWidth: 0,
 });
 
-export const primaryTabsList = style({
-  position: "relative",
-  display: "flex",
-  gap: 2,
-  alignItems: "end",
-  minWidth: 0,
-  minHeight: 34,
-  overflowX: "auto",
-  overflowY: "hidden",
-  borderBottom: `1px solid ${theme.color.border}`,
-});
+export const primaryTabsList = style([
+  tabStrip.list,
+  { overflowX: "auto", overflowY: "hidden" },
+]);
 
-export const primaryTab = style({
-  position: "relative",
-  display: "grid",
-  flex: "0 0 auto",
-  placeItems: "center",
-  minHeight: 32,
-  border: "none",
-  borderRadius: "6px 6px 0 0",
-  padding: "0 12px",
-  color: theme.color.mutedForeground,
-  textDecoration: "none",
-  background: "transparent",
-  cursor: "pointer",
-  fontSize: "0.875rem",
-  lineHeight: 1,
-  whiteSpace: "nowrap",
-  transition: "background 120ms ease-out",
-  selectors: {
-    "&:hover": {
-      color: theme.color.foreground,
-      background: theme.color.surface,
-    },
-    "&[data-selected]": {
-      color: theme.color.foreground,
-    },
-    "&[data-selected]::after": {
-      content: '""',
-      position: "absolute",
-      left: 1,
-      right: 1,
-      bottom: -1,
-      height: 2,
-      borderRadius: 999,
-      background: theme.color.primary,
-    },
-    "&:focus-visible": {
-      outline: `1px solid ${theme.color.primary}`,
-      outlineOffset: -1,
-    },
-  },
-});
+export const primaryTab = tabStrip.item;
 
 export const utilityTabsRoot = style({
   display: "grid",

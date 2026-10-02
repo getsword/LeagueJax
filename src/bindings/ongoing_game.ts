@@ -10,6 +10,12 @@ import type {
 import type { RawMatchSummaryGame } from "./matches";
 import type { SummonerInfo } from "./summoner";
 
+export type EnemyChampionPick = {
+  cellId: number;
+  championId: number;
+  position: string;
+};
+
 export type OngoingGameMatchHistoriesUpdated = {
   phase: OngoingGamePhase;
   state: OngoingGameMatchHistoryState;
@@ -104,4 +110,5 @@ export type OngoingGameUpdated = {
   ready_check: MatchmakingReadyCheckData | null;
   champ_select_session: ChampSelectSessionData | null;
   team_members: Array<OngoingGameTeamMember>;
+  enemy_champion_picks: Array<EnemyChampionPick>;
 };

@@ -144,6 +144,7 @@ export type OngoingGameUiState = {
   matchmakingSearch: OngoingGameUpdated["matchmaking_search"];
   readyCheck: OngoingGameUpdated["ready_check"];
   champSelectSession: OngoingGameUpdated["champ_select_session"];
+  enemyChampionPicks: OngoingGameUpdated["enemy_champion_picks"];
   summonerStatesByPuuid: Record<string, OngoingGameSummonerState>;
   historyStatesByPuuid: Record<string, OngoingGameMatchHistoryState>;
   summonersByPuuid: Record<string, SummonerInfo>;
@@ -162,6 +163,7 @@ const initialState: OngoingGameUiState = {
   matchmakingSearch: null,
   readyCheck: null,
   champSelectSession: null,
+  enemyChampionPicks: [],
   summonerStatesByPuuid: {},
   historyStatesByPuuid: {},
   summonersByPuuid: {},
@@ -194,6 +196,8 @@ function commonFields(payload: OngoingGameUpdated) {
     matchmakingSearch: payload.matchmaking_search,
     readyCheck: payload.ready_check,
     champSelectSession: payload.champ_select_session,
+    enemyChampionPicks:
+      payload.phase === "ChampSelect" ? payload.enemy_champion_picks : [],
   } as const;
 }
 

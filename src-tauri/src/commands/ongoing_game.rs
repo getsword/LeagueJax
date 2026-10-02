@@ -43,6 +43,7 @@ pub async fn ongoing_game_get_snapshot(
             ready_check: None,
             champ_select_session: None,
             team_members: Vec::new(),
+            enemy_champion_picks: Vec::new(),
         }))
 }
 

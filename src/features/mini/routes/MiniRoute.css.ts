@@ -3,7 +3,8 @@ import { theme } from "@/styles/theme.css";
 
 export const root = style({
   display: "grid",
-  gridTemplateRows: "1fr auto",
+  gridTemplateRows: "minmax(0, 1fr)",
+  minHeight: 0,
   height: "100%",
   padding: "18px 16px 14px",
   gap: "14px",

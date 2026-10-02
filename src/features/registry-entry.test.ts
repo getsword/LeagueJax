@@ -19,6 +19,7 @@ describe("window-specific web shard registries", () => {
       SHARD_IDS.TRAY,
       SHARD_IDS.MINI,
       SHARD_IDS.HISTORY,
+      SHARD_IDS.CHAMPIONS,
       SHARD_IDS.REPLAY,
       SHARD_IDS.ONGOING_GAME,
       SHARD_IDS.AUTOMATION,
@@ -36,6 +37,7 @@ describe("window-specific web shard registries", () => {
       SHARD_IDS.ONGOING_GAME,
     ]);
     expect(MINI_WEB_SHARD_IDS).not.toContain(SHARD_IDS.HISTORY);
+    expect(MINI_WEB_SHARD_IDS).not.toContain(SHARD_IDS.CHAMPIONS);
     expect(MINI_WEB_SHARD_IDS).not.toContain(SHARD_IDS.REPLAY);
     expect(MINI_WEB_SHARD_IDS).not.toContain(SHARD_IDS.TOOLS);
     expect(MINI_WEB_SHARD_IDS).not.toContain(SHARD_IDS.AUTOMATION);

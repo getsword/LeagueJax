@@ -3,11 +3,13 @@ import { createListCollection, Select } from "@ark-ui/solid/select";
 import { keyArray } from "@solid-primitives/keyed";
 import { Check, ChevronsUpDown } from "lucide-solid";
 import type { JSX } from "solid-js";
-import { Show } from "solid-js";
+import { Show, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 import {
-  type SettingsControlLayoutProps,
+  type SettingsControlProps,
+  type SettingsControlSlotProps,
   settingsControlClassName,
+  settingsControlLayoutKeys,
   settingsControlStyle,
 } from "./SettingsControl";
 import * as s from "./SettingsSelect.css.ts";
@@ -25,16 +27,31 @@ type SelectGroup = {
   items: SelectItem[];
 };
 
-type SettingsSelectProps = SettingsControlLayoutProps & {
-  collection: ReturnType<typeof createListCollection<SelectItem>>;
+interface SettingsSelectOwnProps {
   value: string[];
-  onValueChange: (details: { value: string[] }) => void;
-  disabled?: boolean;
+  onValueChange: NonNullable<Select.RootProps<SelectItem>["onValueChange"]>;
   placeholder?: string;
   formatValue?: (label: string) => string;
   groups?: SelectGroup[];
   disablePortal?: boolean;
-};
+  triggerProps?: SettingsControlSlotProps<Select.TriggerProps>;
+  hiddenSelectProps?: SettingsControlSlotProps<
+    Select.HiddenSelectProps,
+    | "value"
+    | "defaultValue"
+    | "name"
+    | "form"
+    | "disabled"
+    | "required"
+    | "multiple"
+  >;
+}
+
+export type SettingsSelectProps = SettingsControlProps<
+  Select.RootProps<SelectItem>,
+  SettingsSelectOwnProps,
+  "defaultValue"
+>;
 
 function FormattedValueText(props: {
   formatValue: (label: string) => string;
@@ -122,16 +139,31 @@ function GroupedItems(props: {
 }
 
 export function SettingsSelect(props: SettingsSelectProps): JSX.Element {
+  const [layout, local, rootProps] = splitProps(
+    props,
+    settingsControlLayoutKeys,
+    [
+      "placeholder",
+      "formatValue",
+      "groups",
+      "disablePortal",
+      "triggerProps",
+      "hiddenSelectProps",
+    ],
+  );
   const listContent = () => (
     <Select.Positioner class={s.positioner}>
       <Select.Content class={s.content}>
         <Select.List class={s.list}>
           <Show
-            when={props.groups}
-            fallback={<FlatItems collection={props.collection} />}
+            when={local.groups}
+            fallback={<FlatItems collection={rootProps.collection} />}
           >
             {(groups) => (
-              <GroupedItems groups={groups()} collection={props.collection} />
+              <GroupedItems
+                groups={groups()}
+                collection={rootProps.collection}
+              />
             )}
           </Show>
         </Select.List>
@@ -141,45 +173,32 @@ export function SettingsSelect(props: SettingsSelectProps): JSX.Element {
 
   return (
     <Select.Root
-      class={`${settingsControlClassName({
-        className: props.className,
-        fit: props.fit,
-        size: props.size,
-      })} ${s.root}`}
-      style={
-        settingsControlStyle({
-          fit: props.fit,
-          height: props.height,
-          size: props.size,
-          width: props.width,
-        }) as unknown as JSX.CSSProperties
-      }
-      collection={props.collection}
-      value={props.value}
-      onValueChange={props.onValueChange}
-      disabled={props.disabled}
+      {...rootProps}
+      class={`${settingsControlClassName(layout)} ${s.root}`}
+      style={settingsControlStyle(layout)}
       positioning={{
         sameWidth: true,
         placement: "bottom-start",
         gutter: 4,
+        ...rootProps.positioning,
       }}
     >
-      <Select.HiddenSelect />
+      <Select.HiddenSelect {...local.hiddenSelectProps} />
       <Select.Control class={s.control}>
-        <Select.Trigger class={s.trigger}>
+        <Select.Trigger {...local.triggerProps} class={s.trigger}>
           <Show
-            when={props.formatValue}
+            when={local.formatValue}
             fallback={
               <Select.ValueText
                 class={s.valueText}
-                placeholder={props.placeholder}
+                placeholder={local.placeholder}
               />
             }
           >
             {(formatValue) => (
               <FormattedValueText
                 formatValue={formatValue()}
-                placeholder={props.placeholder}
+                placeholder={local.placeholder}
               />
             )}
           </Show>
@@ -188,7 +207,7 @@ export function SettingsSelect(props: SettingsSelectProps): JSX.Element {
           </Select.Indicator>
         </Select.Trigger>
       </Select.Control>
-      {props.disablePortal ? listContent() : <Portal>{listContent()}</Portal>}
+      {local.disablePortal ? listContent() : <Portal>{listContent()}</Portal>}
     </Select.Root>
   );
 }

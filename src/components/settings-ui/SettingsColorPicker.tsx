@@ -3,13 +3,21 @@ import { ColorPicker, parseColor } from "@ark-ui/solid/color-picker";
 import { Key } from "@solid-primitives/keyed";
 import { Pipette } from "lucide-solid";
 import type { JSX } from "solid-js";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  Show,
+  splitProps,
+} from "solid-js";
 import { Portal } from "solid-js/web";
 import { useSolidTranslation } from "@/i18n/solid";
 import * as s from "./SettingsColorPicker.css.ts";
 import {
-  type SettingsControlLayoutProps,
+  type SettingsControlProps,
+  type SettingsControlSlotProps,
   settingsControlClassName,
+  settingsControlLayoutKeys,
   settingsControlStyle,
 } from "./SettingsControl";
 
@@ -19,7 +27,7 @@ const TRANSPARENT_HEX_COLOR = "#00000000";
 type ColorPickerOutputFormat = "hex" | "hexa";
 type ColorPickerVariant = "default" | "compact";
 
-interface SettingsColorPickerProps extends SettingsControlLayoutProps {
+interface SettingsColorPickerOwnProps {
   ariaLabel: string;
   livePreview?: boolean;
   outputFormat?: ColorPickerOutputFormat;
@@ -31,7 +39,21 @@ interface SettingsColorPickerProps extends SettingsControlLayoutProps {
   triggerTitle?: string;
   variant?: ColorPickerVariant;
   onValueChange: (value: string) => void;
+  triggerProps?: SettingsControlSlotProps<
+    ColorPicker.TriggerProps,
+    "aria-label"
+  >;
+  hiddenInputProps?: SettingsControlSlotProps<
+    ColorPicker.HiddenInputProps,
+    "value" | "defaultValue" | "type" | "name" | "form" | "disabled"
+  >;
 }
+
+export type SettingsColorPickerProps = SettingsControlProps<
+  ColorPicker.RootProps,
+  SettingsColorPickerOwnProps,
+  "defaultValue" | "format" | "defaultFormat" | "onFormatChange"
+>;
 
 function normalizeHexColor(
   value: unknown,
@@ -61,15 +83,34 @@ function toHexColor(
 export function SettingsColorPicker(
   props: SettingsColorPickerProps,
 ): JSX.Element {
+  const [layout, local, rootProps] = splitProps(
+    props,
+    settingsControlLayoutKeys,
+    [
+      "ariaLabel",
+      "livePreview",
+      "outputFormat",
+      "value",
+      "presets",
+      "presetsLabel",
+      "respectAlpha",
+      "triggerSettingId",
+      "triggerTitle",
+      "variant",
+      "onValueChange",
+      "onValueChangeEnd",
+      "triggerProps",
+      "hiddenInputProps",
+    ],
+  );
   const { t } = useSolidTranslation();
-  const outputFormat = () => props.outputFormat ?? "hexa";
-  const normalizedValue = createMemo(() => normalizeHexColor(props.value));
-  const [open, setOpen] = createSignal(false);
+  const outputFormat = () => local.outputFormat ?? "hexa";
+  const normalizedValue = createMemo(() => normalizeHexColor(local.value));
   const [colorValue, setColorValue] = createSignal(
     toColorValue(normalizedValue()),
   );
   const normalizedPresets = createMemo(() =>
-    (props.presets ?? []).map((preset) => normalizeHexColor(preset)),
+    (local.presets ?? []).map((preset) => normalizeHexColor(preset)),
   );
 
   createEffect(() => {
@@ -83,7 +124,7 @@ export function SettingsColorPicker(
   });
 
   const commitColor = (nextColor = colorValue()) => {
-    props.onValueChange(toHexColor(nextColor, outputFormat()));
+    local.onValueChange(toHexColor(nextColor, outputFormat()));
   };
 
   const commitPreset = (preset: string) => {
@@ -95,51 +136,43 @@ export function SettingsColorPicker(
 
   return (
     <ColorPicker.Root
-      lazyMount
-      unmountOnExit
-      class={settingsControlClassName({
-        className: props.className,
-        fit: props.fit,
-        size: props.size,
-      })}
-      style={
-        settingsControlStyle({
-          fit: props.fit,
-          height: props.height,
-          size: props.size,
-          width: props.width,
-        }) as unknown as JSX.CSSProperties
-      }
+      {...rootProps}
+      lazyMount={rootProps.lazyMount ?? true}
+      unmountOnExit={rootProps.unmountOnExit ?? true}
+      class={settingsControlClassName(layout)}
+      style={settingsControlStyle(layout)}
       format="hsba"
-      open={open()}
-      positioning={{ placement: "bottom-end", gutter: 6 }}
-      value={colorValue()}
-      onOpenChange={(details) => {
-        setOpen(details.open);
+      positioning={{
+        placement: "bottom-end",
+        gutter: 6,
+        ...rootProps.positioning,
       }}
+      value={colorValue()}
       onValueChange={(details) => {
         setColorValue(details.value);
-        if (props.livePreview ?? false) {
+        if (local.livePreview ?? false) {
           commitColor(details.value);
         }
       }}
       onValueChangeEnd={(details) => {
-        if (!(props.livePreview ?? false)) {
+        if (!(local.livePreview ?? false)) {
           commitColor(details.value);
         }
+        local.onValueChangeEnd?.(details);
       }}
     >
-      <ColorPicker.Label class={s.label}>{props.ariaLabel}</ColorPicker.Label>
+      <ColorPicker.Label class={s.label}>{local.ariaLabel}</ColorPicker.Label>
       <ColorPicker.Control class={s.control}>
         <ColorPicker.Trigger
-          aria-label={props.ariaLabel}
-          class={s.trigger({ variant: props.variant ?? "default" })}
-          data-setting-id={props.triggerSettingId}
-          title={props.triggerTitle}
+          {...local.triggerProps}
+          aria-label={local.ariaLabel}
+          class={s.trigger({ variant: local.variant ?? "default" })}
+          data-setting-id={local.triggerSettingId}
+          title={local.triggerProps?.title ?? local.triggerTitle}
         >
           <ColorPicker.ValueSwatch
             class={s.valueSwatch}
-            respectAlpha={props.respectAlpha ?? true}
+            respectAlpha={local.respectAlpha ?? true}
           />
         </ColorPicker.Trigger>
       </ColorPicker.Control>
@@ -157,7 +190,7 @@ export function SettingsColorPicker(
             </ColorPicker.Area>
             <div class={s.slidersRow}>
               <ColorPicker.EyeDropperTrigger
-                aria-label={`${props.ariaLabel} eyedropper`}
+                aria-label={`${local.ariaLabel} eyedropper`}
                 class={s.eyeDropperTrigger}
               >
                 <Pipette size={16} aria-hidden="true" />
@@ -175,19 +208,19 @@ export function SettingsColorPicker(
             </div>
             <div class={s.inputsRow}>
               <ColorPicker.ChannelInput
-                aria-label={`${props.ariaLabel} hex`}
+                aria-label={`${local.ariaLabel} hex`}
                 channel="hex"
                 class={s.input}
               />
               <ColorPicker.ChannelInput
-                aria-label={`${props.ariaLabel} alpha`}
+                aria-label={`${local.ariaLabel} alpha`}
                 channel="alpha"
                 class={s.input}
               />
             </div>
             <Show when={normalizedPresets().length > 0}>
               <div class={s.presetsLabel}>
-                {props.presetsLabel ?? t("settings.colorPicker.presets")}
+                {local.presetsLabel ?? t("settings.colorPicker.presets")}
               </div>
               <ColorPicker.SwatchGroup class={s.swatchGroup}>
                 <Key each={normalizedPresets()} by={(preset) => preset}>
@@ -195,7 +228,7 @@ export function SettingsColorPicker(
                     <ColorPicker.SwatchTrigger
                       aria-label={`Use preset color ${preset()}`}
                       class={s.swatchTrigger({
-                        variant: props.variant ?? "default",
+                        variant: local.variant ?? "default",
                       })}
                       value={preset()}
                       onClick={() => {
@@ -205,7 +238,7 @@ export function SettingsColorPicker(
                       <ColorPicker.Swatch
                         class={s.swatch}
                         value={preset()}
-                        respectAlpha={props.respectAlpha ?? true}
+                        respectAlpha={local.respectAlpha ?? true}
                       />
                     </ColorPicker.SwatchTrigger>
                   )}
@@ -215,7 +248,7 @@ export function SettingsColorPicker(
           </ColorPicker.Content>
         </ColorPicker.Positioner>
       </Portal>
-      <ColorPicker.HiddenInput />
+      <ColorPicker.HiddenInput {...local.hiddenInputProps} />
     </ColorPicker.Root>
   );
 }

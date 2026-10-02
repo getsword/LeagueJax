@@ -7,6 +7,7 @@ pub mod map;
 pub mod mcp;
 pub mod mini_window;
 pub mod ongoing_game;
+pub mod opgg;
 pub mod platform;
 pub mod replay;
 pub mod settings;

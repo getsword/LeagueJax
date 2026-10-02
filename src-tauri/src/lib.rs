@@ -26,6 +26,7 @@ use crate::commands::map::*;
 use crate::commands::mcp::*;
 use crate::commands::mini_window::*;
 use crate::commands::ongoing_game::*;
+use crate::commands::opgg::*;
 use crate::commands::platform::*;
 use crate::commands::replay::*;
 use crate::commands::settings::*;
@@ -297,6 +298,8 @@ pub fn run() {
             lcu_get_pickable_champion_ids,
             lcu_dodge_champ_select,
             lcu_kill_and_restart_ux,
+            opgg_list_champions,
+            opgg_get_champion_detail,
             ongoing_game_get_snapshot,
             ongoing_game_refresh,
             ongoing_game_refresh_match_histories,
