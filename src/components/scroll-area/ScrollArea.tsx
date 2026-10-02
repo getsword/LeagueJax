@@ -13,6 +13,7 @@ type ScrollAreaProps = {
   className?: string;
   contentClassName?: string;
   direction?: ScrollAreaDirection;
+  disabled?: boolean;
   mode?: ScrollAreaMode;
   outsetWidth?: string;
   scrollbarClassName?: string;
@@ -36,7 +37,9 @@ function hasHorizontalScrollbar(direction: ScrollAreaDirection) {
 function viewportStyle(
   mode: ScrollAreaMode,
   direction: ScrollAreaDirection,
+  disabled: boolean,
 ): JSX.CSSProperties {
+  if (disabled) return { overflow: "visible" };
   const vertical = hasVerticalScrollbar(direction);
   const horizontal = hasHorizontalScrollbar(direction);
 
@@ -74,6 +77,8 @@ function horizontalScrollbarStyle(mode: ScrollAreaMode): JSX.CSSProperties {
   };
 }
 
+// Responsive layouts can transfer scroll ownership without reparenting live
+// child nodes. Disabled areas keep their content mounted and expose no track.
 export function ScrollArea(props: ScrollAreaProps): JSX.Element {
   const direction = () => props.direction ?? "vertical";
   const mode = () => props.mode ?? "overlay";
@@ -90,7 +95,9 @@ export function ScrollArea(props: ScrollAreaProps): JSX.Element {
     >
       <ArkScrollArea.Viewport
         class={cx(s.viewport, props.viewportClassName)}
-        style={viewportStyle(mode(), direction())}
+        data-scroll-disabled={props.disabled ? "" : undefined}
+        tabIndex={props.disabled ? -1 : undefined}
+        style={viewportStyle(mode(), direction(), props.disabled ?? false)}
       >
         <ArkScrollArea.Content
           class={cx(s.content, props.contentClassName)}
@@ -100,7 +107,7 @@ export function ScrollArea(props: ScrollAreaProps): JSX.Element {
         </ArkScrollArea.Content>
       </ArkScrollArea.Viewport>
 
-      <Show when={vertical()}>
+      <Show when={!props.disabled && vertical()}>
         <ArkScrollArea.Scrollbar
           class={cx(s.verticalScrollbar, props.scrollbarClassName)}
           data-scroll-mode={mode()}
@@ -111,7 +118,7 @@ export function ScrollArea(props: ScrollAreaProps): JSX.Element {
         </ArkScrollArea.Scrollbar>
       </Show>
 
-      <Show when={horizontal()}>
+      <Show when={!props.disabled && horizontal()}>
         <ArkScrollArea.Scrollbar
           class={cx(s.horizontalScrollbar, props.scrollbarClassName)}
           data-scroll-mode={mode()}

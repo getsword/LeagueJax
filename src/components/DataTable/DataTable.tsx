@@ -1,14 +1,17 @@
 /** @jsxImportSource solid-js */
 import { keyArray } from "@solid-primitives/keyed";
 import {
+  type Column,
   type ColumnDef,
   createSolidTable,
   flexRender,
   getCoreRowModel,
   type Row,
 } from "@tanstack/solid-table";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
 import type { JSX } from "solid-js";
 import { Show } from "solid-js";
+import { ScrollArea } from "@/components/scroll-area";
 import * as s from "./DataTable.css.ts";
 
 interface DataTableProps<T> {
@@ -18,14 +21,46 @@ interface DataTableProps<T> {
   columns: ColumnDef<T, any>[];
   emptyText?: string;
   getRowClassName?: (row: Row<T>) => string | undefined;
+  // Requires a bounded parent; only the table body owns a scroll viewport.
   stickyHeader?: boolean;
+  // Outset tracks require a reserved gutter outside the table frame.
+  scrollbarMode?: "inline" | "outset";
+  outsetWidth?: string;
 }
 
 function joinClassNames(...classNames: Array<string | undefined>): string {
   return classNames.filter(Boolean).join(" ");
 }
 
+// Each layout table needs its own DOM nodes but shares the same column sizing.
+function TableColumns<T>(props: { columns: Column<T>[] }): JSX.Element {
+  const colNodes = keyArray(
+    () => props.columns,
+    (col) => col.id,
+    (col) => {
+      const hasExplicitSize = () =>
+        col().columnDef.size != null &&
+        col().columnDef.size !== 150 &&
+        col().columnDef.size !== 0;
+      return (
+        <col
+          class={s.column}
+          style={assignInlineVars({
+            [s.columnWidth]: hasExplicitSize()
+              ? `${col().columnDef.size}px`
+              : undefined,
+          })}
+        />
+      );
+    },
+  );
+  return <colgroup>{colNodes()}</colgroup>;
+}
+
+// Fixed mode separates the header from scrolling without duplicating it. The
+// layout tables are presentational so their explicit rows form one ARIA table.
 export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
+  const scrollbarMode = () => props.scrollbarMode ?? "inline";
   const table = createSolidTable({
     get data() {
       return props.data;
@@ -35,25 +70,6 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
     },
     getCoreRowModel: getCoreRowModel(),
   });
-  const colNodes = keyArray(
-    () => table.getAllColumns(),
-    (col) => col.id,
-    (col) => {
-      const hasExplicitSize = () =>
-        col().columnDef.size != null &&
-        col().columnDef.size !== 150 &&
-        col().columnDef.size !== 0;
-      return (
-        <col
-          style={
-            hasExplicitSize()
-              ? { width: `${col().columnDef.size}px` }
-              : undefined
-          }
-        />
-      );
-    },
-  );
   const headerRows = keyArray(
     () => table.getHeaderGroups(),
     (headerGroup) => headerGroup.id,
@@ -66,15 +82,14 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
             header().column.columnDef.meta as
               | { className?: string }
               | undefined;
-          const cls = () =>
-            joinClassNames(
-              s.headCell({
-                stickyHeader: props.stickyHeader ? "enabled" : "disabled",
-              }),
-              meta()?.className,
-            );
+          const cls = () => joinClassNames(s.headCell, meta()?.className);
           return (
-            <th class={cls()}>
+            <th
+              class={cls()}
+              role={props.stickyHeader ? "columnheader" : undefined}
+              colSpan={header().colSpan}
+              scope={header().colSpan > 1 ? "colgroup" : "col"}
+            >
               {header().isPlaceholder
                 ? null
                 : flexRender(
@@ -85,7 +100,9 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
           );
         },
       );
-      return <tr>{headerCells()}</tr>;
+      return (
+        <tr role={props.stickyHeader ? "row" : undefined}>{headerCells()}</tr>
+      );
     },
   );
   const bodyRows = keyArray(
@@ -103,18 +120,43 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
               ? `${s.bodyCell} ${meta()?.className}`
               : s.bodyCell;
           return (
-            <td class={cls()}>
+            <td class={cls()} role={props.stickyHeader ? "cell" : undefined}>
               {flexRender(cell().column.columnDef.cell, cell().getContext())}
             </td>
           );
         },
       );
       return (
-        <tr data-row="" class={props.getRowClassName?.(row())}>
+        <tr
+          data-row=""
+          role={props.stickyHeader ? "row" : undefined}
+          class={props.getRowClassName?.(row())}
+        >
           {visibleCells()}
         </tr>
       );
     },
+  );
+
+  const body = () => (
+    <tbody role={props.stickyHeader ? "rowgroup" : undefined}>
+      <Show
+        when={table.getRowModel().rows.length > 0}
+        fallback={
+          <tr role={props.stickyHeader ? "row" : undefined}>
+            <td
+              role={props.stickyHeader ? "cell" : undefined}
+              colSpan={table.getVisibleLeafColumns().length}
+              class={s.empty}
+            >
+              {props.emptyText}
+            </td>
+          </tr>
+        }
+      >
+        {bodyRows()}
+      </Show>
+    </tbody>
   );
 
   return (
@@ -122,28 +164,44 @@ export function DataTable<T>(props: DataTableProps<T>): JSX.Element {
       class={joinClassNames(
         s.tableWrap({
           stickyHeader: props.stickyHeader ? "enabled" : "disabled",
+          scrollbarMode: scrollbarMode(),
         }),
         props.className,
       )}
+      role={props.stickyHeader ? "table" : undefined}
     >
-      <table class={s.table}>
-        <colgroup>{colNodes()}</colgroup>
-        <thead>{headerRows()}</thead>
-        <tbody>
-          <Show
-            when={table.getRowModel().rows.length > 0}
-            fallback={
-              <tr>
-                <td colSpan={props.columns.length} class={s.empty}>
-                  {props.emptyText}
-                </td>
-              </tr>
-            }
-          >
-            {bodyRows()}
-          </Show>
-        </tbody>
-      </table>
+      <Show
+        when={props.stickyHeader}
+        fallback={
+          <table class={s.table}>
+            <TableColumns columns={table.getVisibleLeafColumns()} />
+            <thead>{headerRows()}</thead>
+            {body()}
+          </table>
+        }
+      >
+        <div class={s.header({ scrollbarMode: scrollbarMode() })}>
+          <table class={s.table} role="presentation">
+            <TableColumns columns={table.getVisibleLeafColumns()} />
+            <thead role={props.stickyHeader ? "rowgroup" : undefined}>
+              {headerRows()}
+            </thead>
+          </table>
+        </div>
+        <ScrollArea
+          className={s.bodyScroller}
+          viewportClassName={s.bodyViewport}
+          direction="vertical"
+          mode={scrollbarMode()}
+          outsetWidth={props.outsetWidth}
+          scrollbarSize={s.bodyScrollbarSize}
+        >
+          <table class={s.table} role="presentation">
+            <TableColumns columns={table.getVisibleLeafColumns()} />
+            {body()}
+          </table>
+        </ScrollArea>
+      </Show>
     </div>
   );
 }

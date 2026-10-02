@@ -6,19 +6,11 @@ export const scrollAreaScrollbarSize = createVar();
 
 export const scrollAreaOutsetWidthValue = fallbackVar(
   scrollAreaOutsetWidth,
-  "0px",
+  "12px",
 );
 export const scrollAreaScrollbarSizeValue = fallbackVar(
   scrollAreaScrollbarSize,
   "8px",
-);
-const verticalOutsetTrackSize = fallbackVar(
-  scrollAreaOutsetWidth,
-  scrollAreaScrollbarSizeValue,
-);
-const horizontalOutsetTrackSize = fallbackVar(
-  scrollAreaOutsetWidth,
-  scrollAreaScrollbarSizeValue,
 );
 
 export const root = style({
@@ -60,7 +52,7 @@ export const verticalScrollbar = style({
       width: scrollAreaScrollbarSizeValue,
     },
     '&[data-scroll-mode="outset"]': {
-      width: verticalOutsetTrackSize,
+      width: scrollAreaOutsetWidthValue,
     },
   },
 });
@@ -76,7 +68,7 @@ export const horizontalScrollbar = style({
       height: scrollAreaScrollbarSizeValue,
     },
     '&[data-scroll-mode="outset"]': {
-      height: horizontalOutsetTrackSize,
+      height: scrollAreaOutsetWidthValue,
     },
   },
 });

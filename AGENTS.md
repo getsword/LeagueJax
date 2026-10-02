@@ -164,6 +164,22 @@ This project uses **bun** (lockfile: `bun.lock`). Use `bun` / `bunx` instead of 
   layout structure whenever possible; avoid large DOM replacements after loading completes. Prefer skeletons, reserved
   space, stable grid tracks, progressive content fill, or state changes inside existing containers.
 
+## Scroll Areas
+
+- Reuse `ScrollArea` from `src/components/scroll-area` for page and panel scrolling. Do not create feature-specific
+  scrollbar components or duplicate native scrollbar CSS in feature styles.
+- Ordinary vertical lists and page content should use `direction="vertical"`, `mode="outset"`, and a matching reserved
+  outer gutter (normally `outsetWidth="12px"` with 12px of space in the containing layout). Keep the track outside
+  interactive content and inside the available page bounds; it must not cover rows or be clipped by an ancestor.
+- Use `mode="overlay"` only for intentional overlay scrolling, such as compact two-axis tables. Use `mode="inline"`
+  when the scrollbar space needs to be reserved inside the viewport. Choose the mode explicitly at each call site.
+- Constrain scroll containers with `minHeight: 0` / `minWidth: 0` and `minmax(0, 1fr)` grid tracks. Put layout styles
+  for scrolling content on `contentClassName`; use `className` for the scroll container's size and grid placement.
+- Keep one scroll owner per content region. A table inside a page scroll area should not enable a second scrolling
+  wrapper. Preserve the scroll container and its dimensions through loading, empty, error, and loaded states.
+- Document-level native scrollbar resets remain in `src/styles/global.css.ts`; reusable scrollbar appearance belongs
+  to `src/components/scroll-area/ScrollArea.css.ts`.
+
 ## Frontend Testing
 
 - For frontend **UI/presentation-only** changes such as visual styling, layout tuning, static markup composition, icon
