@@ -122,12 +122,16 @@ function InputField(props: {
 
   return (
     <SettingsInput
+      {...(inputType === "number"
+        ? {
+            type: "number" as const,
+            min: numberControl?.min ?? undefined,
+            max: numberControl?.max ?? undefined,
+            step: numberControl?.step ?? undefined,
+          }
+        : { type: "text" as const })}
       ariaLabel={props.ariaLabel}
-      type={inputType}
       value={String(value() ?? "")}
-      min={numberControl?.min ?? undefined}
-      max={numberControl?.max ?? undefined}
-      step={numberControl?.step ?? undefined}
       placeholder={placeholder()}
       onValueChange={(next) => {
         if (props.field.control.kind === "number") {

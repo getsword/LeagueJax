@@ -16,6 +16,41 @@ export interface SettingsControlLayoutProps {
   width?: CSSDimension;
 }
 
+export const settingsControlLayoutKeys = [
+  "className",
+  "fit",
+  "height",
+  "size",
+  "width",
+] as const satisfies readonly (keyof SettingsControlLayoutProps)[];
+
+// Wrappers own their structure and styles; callers can extend the remaining native props.
+export type SettingsControlSlotProps<
+  Props,
+  ReservedKeys extends PropertyKey = never,
+> = Omit<
+  Props,
+  | "asChild"
+  | "children"
+  | "class"
+  | "style"
+  | "innerHTML"
+  | "innerText"
+  | "textContent"
+  | ReservedKeys
+>;
+
+export type SettingsControlProps<
+  Props,
+  OwnProps,
+  ReservedKeys extends PropertyKey = never,
+> = SettingsControlLayoutProps &
+  OwnProps &
+  SettingsControlSlotProps<
+    Props,
+    keyof SettingsControlLayoutProps | keyof OwnProps | ReservedKeys
+  >;
+
 const defaultWidthByFit: Record<SettingsControlFit, string> = {
   fill: "100%",
   content: "max-content",

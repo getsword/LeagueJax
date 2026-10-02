@@ -1,22 +1,22 @@
 /** @jsxImportSource solid-js */
 import { Check, Loader } from "lucide-solid";
-import type { JSX } from "solid-js";
-import { createSignal, onCleanup } from "solid-js";
+import type { ComponentProps, JSX } from "solid-js";
+import { createSignal, onCleanup, splitProps } from "solid-js";
 import { FadingLabel } from "@/components/FadingLabel";
 import * as s from "./SettingsActionButton.css.ts";
 import {
-  type SettingsControlLayoutProps,
+  type SettingsControlProps,
   settingsControlClassName,
+  settingsControlLayoutKeys,
   settingsControlStyle,
 } from "./SettingsControl";
 
 const defaultSuccessFeedbackDurationMs = 1000;
 
-interface SettingsActionButtonProps extends SettingsControlLayoutProps {
+interface SettingsActionButtonOwnProps {
   ariaLabel: string;
   label: string;
   onClick: () => Promise<void>;
-  disabled?: boolean;
   loading?: boolean;
   minLoadingMs?: number;
   successFeedback?: boolean;
@@ -24,13 +24,33 @@ interface SettingsActionButtonProps extends SettingsControlLayoutProps {
   tone?: "accent" | "neutral" | "quiet";
 }
 
+export type SettingsActionButtonProps = SettingsControlProps<
+  ComponentProps<"button">,
+  SettingsActionButtonOwnProps,
+  "type" | "aria-label"
+>;
+
 export function SettingsActionButton(
   props: SettingsActionButtonProps,
 ): JSX.Element {
+  const [layout, local, buttonProps] = splitProps(
+    props,
+    settingsControlLayoutKeys,
+    [
+      "ariaLabel",
+      "label",
+      "onClick",
+      "loading",
+      "minLoadingMs",
+      "successFeedback",
+      "onError",
+      "tone",
+    ],
+  );
   const [pending, setPending] = createSignal(false);
   const [showSuccess, setShowSuccess] = createSignal(false);
   let successTimer: number | null = null;
-  const busy = () => pending() || (props.loading ?? false);
+  const busy = () => pending() || (local.loading ?? false);
 
   onCleanup(() => {
     if (successTimer !== null) {
@@ -39,7 +59,7 @@ export function SettingsActionButton(
   });
 
   const handleClick = async () => {
-    if (busy() || (props.disabled ?? false)) {
+    if (busy() || (buttonProps.disabled ?? false)) {
       return;
     }
 
@@ -54,13 +74,13 @@ export function SettingsActionButton(
     let completedSuccessfully = false;
 
     try {
-      await props.onClick();
+      await local.onClick();
       completedSuccessfully = true;
     } catch (error) {
-      props.onError?.(error);
+      local.onError?.(error);
     } finally {
       const elapsedMs = performance.now() - startedAt;
-      const remainingMs = Math.max(0, (props.minLoadingMs ?? 0) - elapsedMs);
+      const remainingMs = Math.max(0, (local.minLoadingMs ?? 0) - elapsedMs);
       if (remainingMs > 0) {
         await new Promise((resolve) => {
           setTimeout(resolve, remainingMs);
@@ -68,7 +88,7 @@ export function SettingsActionButton(
       }
       setPending(false);
 
-      if (completedSuccessfully && (props.successFeedback ?? false)) {
+      if (completedSuccessfully && (local.successFeedback ?? false)) {
         setShowSuccess(true);
         successTimer = window.setTimeout(() => {
           setShowSuccess(false);
@@ -80,27 +100,17 @@ export function SettingsActionButton(
 
   return (
     <button
+      {...buttonProps}
       type="button"
-      aria-label={props.ariaLabel}
-      class={`${settingsControlClassName({
-        className: props.className,
-        fit: props.fit,
-        size: props.size,
-      })} ${s.tone[props.tone ?? "accent"]}`}
-      style={
-        settingsControlStyle({
-          fit: props.fit,
-          height: props.height,
-          size: props.size,
-          width: props.width,
-        }) as unknown as JSX.CSSProperties
-      }
-      disabled={busy() || (props.disabled ?? false)}
+      aria-label={local.ariaLabel}
+      class={`${settingsControlClassName(layout)} ${s.tone[local.tone ?? "accent"]}`}
+      style={settingsControlStyle(layout)}
+      disabled={busy() || (buttonProps.disabled ?? false)}
       onClick={() => {
         void handleClick();
       }}
     >
-      <FadingLabel text={props.label} />
+      <FadingLabel text={local.label} />
       <span class={s.loaderSlot} aria-hidden="true">
         <Loader
           size={14}
