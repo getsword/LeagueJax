@@ -40,6 +40,8 @@ pub enum Division {
 pub enum QueueType {
     #[serde(rename = "RANKED_SOLO_5x5")]
     RankedSolo5x5,
+    #[serde(rename = "JADE_RANKED_SOLO_5x5")]
+    JadeRankedSolo5x5,
     #[serde(rename = "RANKED_PREMADE_5x5")]
     RankedPremade5x5,
     #[serde(rename = "RANKED_FLEX_SR")]
@@ -240,7 +242,7 @@ pub fn mmr_reference_scale() -> MmrReferenceScale {
 
 #[cfg(test)]
 mod tests {
-    use super::{mmr_reference_scale, QueueType, Tier};
+    use super::{mmr_reference_scale, QueueType, RankStats, RankedTierSummary, Tier};
     use std::collections::HashMap;
 
     #[test]
@@ -293,5 +295,100 @@ mod tests {
             parsed,
             Ok(map) if map.contains_key(&QueueType::RankedPremade5x5)
         ));
+    }
+
+    #[test]
+    fn ranked_stats_preserve_jade_and_standard_solo_queues() -> Result<(), serde_json::Error> {
+        let jade_entry = serde_json::json!({
+            "climbingIndicatorActive": false,
+            "currentSeasonWinsForRewards": 0,
+            "division": "IV",
+            "highestDivision": "IV",
+            "highestTier": "GOLD",
+            "isProvisional": false,
+            "leaguePoints": 42,
+            "losses": 3,
+            "miniSeriesProgress": "",
+            "previousSeasonEndDivision": "NA",
+            "previousSeasonEndTier": "NONE",
+            "previousSeasonHighestDivision": "NA",
+            "previousSeasonHighestTier": "NONE",
+            "previousSeasonWinsForRewards": 0,
+            "provisionalGameThreshold": 5,
+            "provisionalGamesRemaining": 0,
+            "queueType": "JADE_RANKED_SOLO_5x5",
+            "ratedRating": 0,
+            "ratedTier": "NONE",
+            "tier": "GOLD",
+            "wins": 7,
+            "warnings": null
+        });
+        let mut solo_entry = jade_entry.clone();
+        solo_entry["queueType"] = serde_json::json!("RANKED_SOLO_5x5");
+        solo_entry["leaguePoints"] = serde_json::json!(15);
+
+        let response = serde_json::json!({
+            "currentSeasonSplitPoints": 0,
+            "earnedRegaliaRewardIds": [],
+            "highestCurrentSeasonReachedTierSr": "GOLD",
+            "highestPreviousSeasonEndDivision": null,
+            "highestPreviousSeasonEndTier": null,
+            "highestRankedEntry": jade_entry,
+            "highestRankedEntrySr": jade_entry,
+            "previousSeasonSplitPoints": 0,
+            "queueMap": {
+                "JADE_RANKED_SOLO_5x5": jade_entry,
+                "RANKED_SOLO_5x5": solo_entry
+            },
+            "queues": [jade_entry, solo_entry],
+            "rankedRegaliaLevel": 0,
+            "seasons": {
+                "JADE_RANKED_SOLO_5x5": {
+                    "currentSeasonEnd": 0,
+                    "currentSeasonId": 1,
+                    "nextSeasonStart": 0
+                },
+                "RANKED_SOLO_5x5": {
+                    "currentSeasonEnd": 0,
+                    "currentSeasonId": 1,
+                    "nextSeasonStart": 0
+                }
+            },
+            "splitsProgress": {}
+        });
+        let parsed: RankStats = serde_json::from_value(response.clone())?;
+
+        assert_eq!(parsed.queue_map.len(), 2);
+        assert!(matches!(
+            parsed.queue_map.get(&QueueType::JadeRankedSolo5x5),
+            Some(entry) if entry.queue_type == QueueType::JadeRankedSolo5x5 && entry.league_points == 42
+        ));
+        assert!(matches!(
+            parsed.queue_map.get(&QueueType::RankedSolo5x5),
+            Some(entry) if entry.queue_type == QueueType::RankedSolo5x5 && entry.league_points == 15
+        ));
+        assert_eq!(serde_json::to_value(parsed)?, response);
+        Ok(())
+    }
+
+    #[test]
+    fn ranked_tier_summary_accepts_jade_queue_type() -> Result<(), serde_json::Error> {
+        let response = serde_json::json!({
+            "summonerId": 1,
+            "achievedTiers": [{
+                "division": 4,
+                "queueType": "JADE_RANKED_SOLO_5x5",
+                "tier": "GOLD"
+            }]
+        });
+        let parsed: RankedTierSummary = serde_json::from_value(response.clone())?;
+
+        assert_eq!(parsed.achieved_tiers.len(), 1);
+        assert_eq!(
+            parsed.achieved_tiers[0].queue_type,
+            QueueType::JadeRankedSolo5x5
+        );
+        assert_eq!(serde_json::to_value(parsed)?, response);
+        Ok(())
     }
 }
