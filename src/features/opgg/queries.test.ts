@@ -197,6 +197,25 @@ describe("champion request scopes", () => {
     ).toBeUndefined();
     expect(currentChampionList(active, koreaEmerald)).toBe(active);
   });
+
+  test("rapid lane changes retain distinct request arguments and reject a late lane response", async () => {
+    const firstKey = championDetailKey(globalEmerald, 222, "JUNGLE");
+    const nextKey = championDetailKey(globalEmerald, 222, "MID");
+    if (!firstKey || !nextKey)
+      throw new Error("Expected two active lane requests");
+    let finishFirst: (value: OpggChampionDetailDto) => void = () => {};
+    const firstRequest = new Promise<OpggChampionDetailDto>((resolve) => {
+      finishFirst = resolve;
+    });
+    const next = { ...detail(globalEmerald), position: "MID" };
+    expect(championDetailArgs(firstKey).position).toBe("JUNGLE");
+    expect(championDetailArgs(nextKey).position).toBe("MID");
+    expect(currentChampionDetail(next, globalEmerald, 222, "MID")).toBe(next);
+    finishFirst({ ...detail(globalEmerald), position: "JUNGLE" });
+    expect(
+      currentChampionDetail(await firstRequest, globalEmerald, 222, "MID"),
+    ).toBeUndefined();
+  });
 });
 
 describe("champion selection after filtering", () => {

@@ -1,7 +1,11 @@
 /** @jsxImportSource solid-js */
 import { invoke } from "@tauri-apps/api/core";
 import { onMount } from "solid-js";
-import { MiniRoute } from "@/features/mini/routes/MiniRoute";
+import { MiniTabPanels, MiniTabsProvider } from "@/features/mini/tabs/MiniTabs";
+import {
+  createMiniTabDefinitions,
+  DEFAULT_MINI_TAB_ID,
+} from "@/features/mini/tabs/registry";
 import { MiniWindowShell } from "@/layout/__mini-shell";
 
 function useNotifyMiniReady() {
@@ -12,10 +16,13 @@ function useNotifyMiniReady() {
 
 export default function MiniApp() {
   useNotifyMiniReady();
+  const tabs = createMiniTabDefinitions();
 
   return (
-    <MiniWindowShell>
-      <MiniRoute />
-    </MiniWindowShell>
+    <MiniTabsProvider tabs={tabs} defaultId={DEFAULT_MINI_TAB_ID}>
+      <MiniWindowShell>
+        <MiniTabPanels />
+      </MiniWindowShell>
+    </MiniTabsProvider>
   );
 }

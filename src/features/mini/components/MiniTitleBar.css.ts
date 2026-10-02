@@ -3,7 +3,7 @@ import { theme } from "@/styles/theme.css.ts";
 
 export const header = style({
   display: "grid",
-  gridTemplateColumns: "1fr auto",
+  gridTemplateColumns: "auto minmax(40px, 1fr) auto",
   height: 36,
   background: "transparent",
   borderBottom: `1px solid ${theme.color.border}`,
@@ -11,13 +11,8 @@ export const header = style({
 });
 
 export const dragZone = style({
-  display: "grid",
-  alignItems: "center",
-  paddingInline: 10,
-  fontSize: "0.72rem",
-  color: theme.color.mutedForeground,
-  letterSpacing: "0.02em",
-  textTransform: "uppercase",
+  minWidth: 0,
+  height: "100%",
 });
 
 export const controls = style({

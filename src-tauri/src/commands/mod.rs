@@ -1,6 +1,5 @@
 pub mod auto_accept;
 pub mod claim_tool;
-pub mod counter_overlay;
 pub mod game_reference;
 pub mod history;
 pub mod lcu;

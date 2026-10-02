@@ -1,13 +1,18 @@
 import type { LocaleResource } from "@/i18n/types";
 
-export const counterOverlayI18n: LocaleResource = {
+export const countersI18n: LocaleResource = {
   en: {
-    counterOverlay: {
+    counters: {
       title: "Counters",
-      source: "OP.GG global ranked",
-      dismiss: "Close",
-      collapse: "Collapse",
-      expand: "Expand",
+      expandAll: "Expand all",
+      collapseAll: "Collapse all",
+      auto: "Automatic",
+      autoPosition: "Auto · {{position}}",
+      manual: "Manual",
+      source: "OP.GG · Global · Emerald+",
+      unavailable: "Available during champion select",
+      inferred: "Estimated lane",
+      retry: "Retry",
       waiting: "Waiting for an enemy lock",
       loading: "Loading OP.GG",
       loadFailed: "Could not load counter data",
@@ -25,12 +30,17 @@ export const counterOverlayI18n: LocaleResource = {
     },
   },
   "zh-CN": {
-    counterOverlay: {
+    counters: {
       title: "克制",
-      source: "OP.GG 全球排位",
-      dismiss: "关闭",
-      collapse: "收起",
-      expand: "展开",
+      expandAll: "全部展开",
+      collapseAll: "全部收起",
+      auto: "自动",
+      autoPosition: "自动 · {{position}}",
+      manual: "手动分路",
+      source: "OP.GG · 全球 · 翡翠及以上",
+      unavailable: "选人阶段可查看克制",
+      inferred: "推测分路",
+      retry: "重试",
       waiting: "等待对方锁定英雄",
       loading: "正在读取 OP.GG",
       loadFailed: "克制数据没能读出来",
@@ -48,12 +58,17 @@ export const counterOverlayI18n: LocaleResource = {
     },
   },
   "ja-JP": {
-    counterOverlay: {
+    counters: {
       title: "カウンター",
-      source: "OP.GG グローバルランク",
-      dismiss: "閉じる",
-      collapse: "折りたたむ",
-      expand: "展開",
+      expandAll: "すべて展開",
+      collapseAll: "すべて閉じる",
+      auto: "自動",
+      autoPosition: "自動 · {{position}}",
+      manual: "手動レーン",
+      source: "OP.GG · グローバル · エメラルド以上",
+      unavailable: "チャンピオン選択中に利用できます",
+      inferred: "推定レーン",
+      retry: "再試行",
       waiting: "相手のロックを待っています",
       loading: "OP.GG を読み込み中",
       loadFailed: "カウンターデータを読み込めませんでした",

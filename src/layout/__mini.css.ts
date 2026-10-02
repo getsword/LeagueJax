@@ -3,7 +3,7 @@ import { theme } from "@/styles/theme.css";
 
 export const shell = style({
   display: "grid",
-  gridTemplateRows: "36px 1fr",
+  gridTemplateRows: "36px minmax(0, 1fr)",
   height: "100vh",
   background: "transparent",
   color: theme.color.foreground,
@@ -11,5 +11,7 @@ export const shell = style({
 });
 
 export const content = style({
+  minHeight: 0,
+  minWidth: 0,
   overflow: "hidden",
 });

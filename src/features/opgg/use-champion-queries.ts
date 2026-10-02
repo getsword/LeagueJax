@@ -17,9 +17,12 @@ import {
 
 // Scope validation belongs to this feature; the generic query runtime only
 // handles keys and resources. Guard failed resource reads before inspecting data.
-export function useChampionListQuery(filters: Accessor<OpggFiltersDto>) {
+export function useChampionListQuery(
+  filters: Accessor<OpggFiltersDto>,
+  enabled: Accessor<boolean> = () => true,
+) {
   const query = createSolidQuery<OpggChampionListDto>(
-    () => championListKey(filters()),
+    () => (enabled() ? championListKey(filters()) : null),
     (key) =>
       invoke(
         "opgg_list_champions",
@@ -43,9 +46,10 @@ export function useChampionDetailQuery(
   filters: Accessor<OpggFiltersDto>,
   championId: Accessor<number | null>,
   position: Accessor<string | null>,
+  enabled: Accessor<boolean> = () => true,
 ) {
   const key = createMemo(() =>
-    championDetailKey(filters(), championId(), position()),
+    enabled() ? championDetailKey(filters(), championId(), position()) : null,
   );
   const query = createSolidQuery<OpggChampionDetailDto>(key, (requestKey) =>
     invoke(

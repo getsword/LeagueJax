@@ -3,6 +3,7 @@ import type { LocaleResource } from "@/i18n/types";
 export const miniI18n: LocaleResource = {
   en: {
     mini: {
+      tabs: { game: "Game" },
       phase: {
         idle: "Idle",
         matchmaking: "Matchmaking",
@@ -69,6 +70,7 @@ export const miniI18n: LocaleResource = {
   },
   "zh-CN": {
     mini: {
+      tabs: { game: "对局" },
       phase: {
         idle: "空闲",
         matchmaking: "队列中",
@@ -135,6 +137,7 @@ export const miniI18n: LocaleResource = {
   },
   "ja-JP": {
     mini: {
+      tabs: { game: "対戦" },
       phase: {
         idle: "待機中",
         matchmaking: "マッチメイキング",

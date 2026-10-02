@@ -9,7 +9,7 @@ export const panel = style({
   minHeight: 0,
   paddingRight: 12,
 });
-export const header = style({ display: "grid", gap: 10, minWidth: 0 });
+export const header = style({ display: "grid", gap: 6, minWidth: 0 });
 export const titleRow = style({
   display: "grid",
   gridTemplateColumns: "minmax(0, 1fr) auto",

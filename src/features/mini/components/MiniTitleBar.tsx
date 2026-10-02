@@ -13,6 +13,7 @@ import {
   MINI_ALWAYS_ON_TOP_SETTING_ID,
   MINI_PIN_SETTING_ID,
 } from "../settings";
+import { MiniTabBar } from "../tabs/MiniTabBar";
 import * as s from "./MiniTitleBar.css.ts";
 
 function useMiniBooleanSetting(id: SettingId, fallback: boolean) {
@@ -44,10 +45,9 @@ export function MiniTitleBar() {
 
   return (
     <header class={s.header}>
+      <MiniTabBar />
       {/* biome-ignore lint/a11y/noStaticElementInteractions: this title bar text is used as a native window drag handle, and on mouse down we may unpin the mini window before starting the Tauri drag operation */}
-      <div class={s.dragZone} onMouseDown={handleDragStart}>
-        Mini
-      </div>
+      <div class={s.dragZone} onMouseDown={handleDragStart} />
 
       <div role="toolbar" aria-label="Window controls" class={s.controls}>
         <AppTooltip content={t("mini.controls.pinTooltip")} placement="bottom">

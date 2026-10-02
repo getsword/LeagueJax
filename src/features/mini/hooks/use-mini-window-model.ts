@@ -1,6 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import type { Accessor } from "solid-js";
-import { createMemo, onMount } from "solid-js";
+import { createMemo } from "solid-js";
 import type {
   BenchChampion,
   ChampSelectSessionData,
@@ -161,14 +160,6 @@ export function useSolidMiniWindowModel(): Accessor<MiniWindowModel> {
   const champSelectSession = useSolidOngoingGameStore(
     (state) => state.champSelectSession,
   );
-
-  onMount(() => {
-    void invoke<OngoingGameUpdated>("ongoing_game_get_snapshot")
-      .then((snapshot) => {
-        useSolidOngoingGameStore.getState().applyUpdated(snapshot);
-      })
-      .catch(() => {});
-  });
 
   const gameflowMap = createMemo(() => gameflowSession()?.map ?? null);
   const gameflowMapMutators = createMemo(() => [

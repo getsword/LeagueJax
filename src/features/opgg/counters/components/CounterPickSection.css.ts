@@ -29,17 +29,33 @@ export const enemyName = style({
   margin: 0,
   fontSize: 15,
   lineHeight: 1.2,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
+export const enemyInfo = style({ display: "grid", gap: 4, minWidth: 0 });
+export const metadata = style({
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 6,
+  minWidth: 0,
 });
 
 export const muted = style({
+  margin: 0,
   color: theme.color.mutedForeground,
   fontSize: 12,
 });
 
 export const toggle = style({
+  display: "grid",
+  placeItems: "center",
+  width: 26,
+  height: 26,
   border: "none",
   borderRadius: 999,
-  padding: "4px 10px",
+  padding: 0,
   background: theme.color.popupBackground,
   color: theme.color.foreground,
   cursor: "pointer",
@@ -49,7 +65,7 @@ export const toggle = style({
 
 export const row = style({
   display: "grid",
-  gridTemplateColumns: "36px minmax(0, 1fr) max-content",
+  gridTemplateColumns: "32px minmax(0, 1fr) max-content",
   gap: 8,
   alignItems: "center",
 });
@@ -80,5 +96,30 @@ export const rateTone = styleVariants({
 
 export const status = style({
   margin: 0,
+  minHeight: 112,
+  display: "grid",
+  justifyItems: "start",
+  alignContent: "center",
+  gap: 8,
+  fontSize: "0.75rem",
   color: theme.color.mutedForeground,
+});
+
+export const body = style({
+  display: "grid",
+  gap: 8,
+  selectors: { "&[hidden]": { display: "none" } },
+});
+
+export const retry = style({
+  padding: "4px 8px",
+  borderRadius: 4,
+  background: theme.color.surface,
+  color: theme.color.foreground,
+  selectors: {
+    "&:focus-visible": {
+      outline: `1px solid ${theme.color.primary}`,
+      outlineOffset: -1,
+    },
+  },
 });

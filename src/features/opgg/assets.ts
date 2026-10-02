@@ -149,5 +149,7 @@ export function useChampionAssets() {
     { initialValue: EMPTY_ASSETS, keepPreviousData: true },
   );
 
-  return createMemo(() => query.data() ?? EMPTY_ASSETS);
+  return createMemo(() =>
+    query.error() ? EMPTY_ASSETS : (query.data() ?? EMPTY_ASSETS),
+  );
 }

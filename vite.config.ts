@@ -48,7 +48,6 @@ export default defineConfig(async ({ command }) => ({
       input: {
         main: path.resolve(dirname, "index.html"),
         mini: path.resolve(dirname, "mini.html"),
-        overlay: path.resolve(dirname, "overlay.html"),
       },
       output: {
         codeSplitting:

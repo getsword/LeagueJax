@@ -1,13 +1,12 @@
 /** @jsxImportSource solid-js */
 import { keyArray } from "@solid-primitives/keyed";
-import { invoke } from "@tauri-apps/api/core";
 import { CircleCheck } from "lucide-solid";
-import { createMemo, createSignal, Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import { ChampionAvatar } from "@/components/champion-avatar/ChampionAvatar";
 import { useSolidTranslation } from "@/i18n/solid";
 import { useSolidChampSelectPickableChampionIds } from "../hooks/use-champ-select-pickable-champion-ids";
+import type { MiniChampSelectActions } from "../hooks/use-mini-champ-select-actions";
 import type { MiniWindowModel } from "../hooks/use-mini-window-model";
-import { MiniBottomPanel } from "./MiniBottomPanel";
 import * as s from "./MiniChampSelectView.css";
 
 type ChampSelectModel = NonNullable<MiniWindowModel["champSelect"]>;
@@ -111,101 +110,26 @@ function ChampSelectStatus(props: {
   );
 }
 
-export function MiniChampSelectView(props: { model: MiniWindowModel }) {
+export function MiniChampSelectView(props: {
+  model: MiniWindowModel;
+  actions: MiniChampSelectActions;
+  active: boolean;
+}) {
   const { t } = useSolidTranslation();
   const champSelect = createMemo(() => props.model.champSelect);
-  const { data: pickableChampionIds } = useSolidChampSelectPickableChampionIds(
-    () => champSelect()?.session.gameId ?? null,
-    () => champSelect()?.session.counter ?? null,
-  );
-  const [pendingChampionId, setPendingChampionId] = createSignal<number | null>(
-    null,
-  );
-  const [dodgePending, setDodgePending] = createSignal(false);
-  const [error, setError] = createSignal<string | null>(null);
-
+  const { data: pickableChampionIds, error: pickableError } =
+    useSolidChampSelectPickableChampionIds(
+      () =>
+        props.active && champSelect()?.mode === "bench"
+          ? (champSelect()?.session.gameId ?? null)
+          : null,
+      () => champSelect()?.session.counter ?? null,
+    );
   const selectedLabel = createMemo(() =>
     champSelect()?.selectedChampionId
       ? t("mini.champSelect.selected")
       : t("mini.champSelect.notSelected"),
   );
-
-  const handleSwap = async (championId: number) => {
-    if (pendingChampionId() !== null) {
-      return;
-    }
-
-    setError(null);
-    setPendingChampionId(championId);
-    try {
-      await invoke("lcu_champ_select_swap_bench_champion", { championId });
-      await invoke("ongoing_game_refresh");
-    } catch {
-      setError(t("mini.champSelect.swapFailed"));
-    } finally {
-      setPendingChampionId(null);
-    }
-  };
-
-  const handleDodge = async () => {
-    const currentChampSelect = champSelect();
-    if (!currentChampSelect) {
-      return;
-    }
-
-    const startedAt = performance.now();
-    const context = {
-      gameId: currentChampSelect.session.gameId,
-      phase: props.model.phase,
-      queueId: currentChampSelect.queueId,
-      selectedChampionId: currentChampSelect.selectedChampionId,
-      pending: dodgePending(),
-    };
-    console.info("[mini-champ-select] dodge click", context);
-
-    if (dodgePending()) {
-      console.info("[mini-champ-select] dodge ignored because pending", {
-        ...context,
-        elapsedMs: Math.round(performance.now() - startedAt),
-      });
-      return;
-    }
-
-    setError(null);
-    setDodgePending(true);
-    try {
-      console.info(
-        "[mini-champ-select] invoke lcu_dodge_champ_select start",
-        context,
-      );
-      await invoke("lcu_dodge_champ_select");
-      console.info(
-        "[mini-champ-select] invoke lcu_dodge_champ_select success",
-        {
-          ...context,
-          elapsedMs: Math.round(performance.now() - startedAt),
-        },
-      );
-      console.info("[mini-champ-select] invoke ongoing_game_refresh start", {
-        ...context,
-        elapsedMs: Math.round(performance.now() - startedAt),
-      });
-      await invoke("ongoing_game_refresh");
-      console.info("[mini-champ-select] invoke ongoing_game_refresh success", {
-        ...context,
-        elapsedMs: Math.round(performance.now() - startedAt),
-      });
-    } catch (caughtError) {
-      console.error("[mini-champ-select] dodge failed", {
-        ...context,
-        elapsedMs: Math.round(performance.now() - startedAt),
-        error: caughtError,
-      });
-      setError(t("mini.champSelect.dodge.failed"));
-    } finally {
-      setDodgePending(false);
-    }
-  };
 
   return (
     <Show when={champSelect()}>
@@ -233,9 +157,11 @@ export function MiniChampSelectView(props: { model: MiniWindowModel }) {
               />
               <BenchChampionPool
                 champSelect={currentChampSelect()}
-                pickableChampionIds={pickableChampionIds() ?? null}
-                pendingChampionId={pendingChampionId()}
-                onSwap={handleSwap}
+                pickableChampionIds={
+                  pickableError() ? null : (pickableChampionIds() ?? null)
+                }
+                pendingChampionId={props.actions.pendingChampionId()}
+                onSwap={props.actions.swap}
               />
             </section>
           </Show>
@@ -243,15 +169,6 @@ export function MiniChampSelectView(props: { model: MiniWindowModel }) {
           <ChampSelectStatus
             champSelect={currentChampSelect()}
             queueName={props.model.queueName}
-          />
-          <div class={s.spacer} />
-          <MiniBottomPanel
-            model={props.model}
-            champSelectDodge={{
-              pending: dodgePending(),
-              error: error(),
-              onDodge: handleDodge,
-            }}
           />
         </section>
       )}
