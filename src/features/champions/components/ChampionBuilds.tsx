@@ -1,10 +1,11 @@
 /** @jsxImportSource solid-js */
 import { ChevronRight } from "lucide-solid";
-import { Index, Show } from "solid-js";
+import { createMemo, Index, Show } from "solid-js";
 import type { OpggBuildDto, OpggChampionDetailDto } from "@/bindings/opgg";
 import { AppTooltip } from "@/components/AppTooltip";
 import { LazyImage } from "@/components/LazyImage";
 import { useSolidTranslation } from "@/i18n/solid";
+import { resolveSkillOrder } from "../skill-order";
 import * as s from "./ChampionBuilds.css";
 import * as shared from "./ChampionPresentation.css";
 import { ChampionRate } from "./ChampionRate";
@@ -30,8 +31,41 @@ function ChampionSkillPriority(props: { skills: string[] }) {
   );
 }
 
+function ChampionSkillStep(props: {
+  level: number;
+  skill: string | null;
+  inferred: boolean;
+}) {
+  const { t } = useSolidTranslation();
+  const tooltip = () => {
+    const level = String(props.level);
+    if (!props.skill) {
+      return t("champions.unavailableSkillLevel", { level });
+    }
+    if (props.inferred) {
+      return t("champions.inferredSkillLevel", { level });
+    }
+    return t("champions.level", { level });
+  };
+
+  return (
+    <AppTooltip content={tooltip()}>
+      {(triggerProps) => (
+        <span
+          {...triggerProps<HTMLSpanElement>({ class: s.skillStep })}
+          data-ultimate={props.skill === "R"}
+        >
+          <span class={s.level}>{props.level}</span>
+          <span>{props.skill || "—"}</span>
+        </span>
+      )}
+    </AppTooltip>
+  );
+}
+
 export function ChampionSkills(props: { detail: OpggChampionDetailDto }) {
   const { t } = useSolidTranslation();
+  const skillOrder = createMemo(() => resolveSkillOrder(props.detail));
   return (
     <div class={s.skills}>
       <ChampionSkillPriority skills={props.detail.skillPriority} />
@@ -41,21 +75,13 @@ export function ChampionSkills(props: { detail: OpggChampionDetailDto }) {
           class={s.skillOrder}
           aria-label="Skill order by champion level"
         >
-          <Index each={props.detail.skillOrder}>
+          <Index each={skillOrder()}>
             {(skill, index) => (
-              <AppTooltip
-                content={t("champions.level", { level: String(index + 1) })}
-              >
-                {(triggerProps) => (
-                  <span
-                    {...triggerProps<HTMLSpanElement>({ class: s.skillStep })}
-                    data-ultimate={skill() === "R"}
-                  >
-                    <span class={s.level}>{index + 1}</span>
-                    <span>{skill()}</span>
-                  </span>
-                )}
-              </AppTooltip>
+              <ChampionSkillStep
+                level={index + 1}
+                skill={skill()}
+                inferred={index >= props.detail.skillOrder.length}
+              />
             )}
           </Index>
         </section>

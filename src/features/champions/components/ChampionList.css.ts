@@ -54,10 +54,6 @@ export const row = style({
       width: 2,
       background: theme.color.primary,
     },
-    "&:focus-within": {
-      outline: `2px solid ${theme.color.primary}`,
-      outlineOffset: -2,
-    },
   },
 });
 export const portrait = style({ width: 32, height: 32, borderRadius: 6 });

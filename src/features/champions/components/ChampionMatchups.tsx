@@ -23,7 +23,6 @@ function MatchupTable(props: {
     {
       id: "champion",
       header: t("champions.champion"),
-      meta: { className: s.cell },
       cell: (context) => (
         <AppTooltip
           content={props.championName(context.row.original.championId)}

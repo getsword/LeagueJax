@@ -40,6 +40,7 @@ export function ChampionList(props: {
           </span>
         </div>
         <SettingsInput
+          name="champions.search"
           className={s.search}
           type="text"
           ariaLabel="Search champions"

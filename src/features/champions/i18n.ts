@@ -51,6 +51,16 @@ const championsCopy = {
     "zh-CN": "等级 {{level}}",
     "ja-JP": "レベル {{level}}",
   },
+  inferredSkillLevel: {
+    en: "Level {{level}} · Inferred from skill caps and priority",
+    "zh-CN": "等级 {{level}} · 按技能等级上限与优先级补全",
+    "ja-JP": "レベル {{level}} · スキル上限と優先順位から補完",
+  },
+  unavailableSkillLevel: {
+    en: "Level {{level}} · Not enough data to infer this skill point",
+    "zh-CN": "等级 {{level}} · 数据不足，无法可靠推导",
+    "ja-JP": "レベル {{level}} · データ不足のため推測できません",
+  },
   noData: {
     en: "No data available",
     "zh-CN": "暂无数据",
@@ -138,6 +148,8 @@ function localeTree(locale: "en" | "zh-CN" | "ja-JP") {
       skillPriority: championsCopy.skillPriority[locale],
       skillLevels: championsCopy.skillLevels[locale],
       level: championsCopy.level[locale],
+      inferredSkillLevel: championsCopy.inferredSkillLevel[locale],
+      unavailableSkillLevel: championsCopy.unavailableSkillLevel[locale],
       noData: championsCopy.noData[locale],
       emptyHint: championsCopy.emptyHint[locale],
       winRate: championsCopy.winRate[locale],

@@ -20,17 +20,6 @@ export const name = style({
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 });
-export const cell = style({
-  padding: "8px 4px",
-  fontSize: "0.8125rem",
-  lineHeight: 1.5,
-  verticalAlign: "middle",
+export const numericCell = style({
+  fontVariantNumeric: "tabular-nums",
 });
-export const numericCell = style([
-  cell,
-  {
-    textAlign: "right",
-    fontVariantNumeric: "tabular-nums",
-    fontSize: "0.75rem",
-  },
-]);
